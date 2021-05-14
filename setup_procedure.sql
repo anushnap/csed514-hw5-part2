@@ -10,9 +10,9 @@ GO
 
 
 --- Drop commands to restructure the DB
-Drop Table VaccineAppointments
 Drop Table Vaccines
 Drop Table Patients
+Drop Table VaccineAppointments
 Drop Table CareGiverSchedule
 Drop Table AppointmentStatusCodes
 Drop Table PatientAppointmentStatusCodes
@@ -133,4 +133,3 @@ Create Table VaccineAppointments(
 		DateAdministered datetime,
 		DoseNumber int
 );
-
