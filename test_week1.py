@@ -18,16 +18,18 @@ class TestCovid19(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(manufac_name="Moderna",
-                                           days_between_doses = 28,
-                                           doses_in_stock = 100,
-                                           doses_reserved = 0,
-                                           cursor=cursor)
+                    covid(vaccine_name = 'Pfizer',
+                          manufac_name = 'Pfizer-BioNTech',
+                          doses_in_stock = 100,
+                          doses_reserved = 0,
+                          days_between_doses = 21,
+                          doses_per_patient = 2,
+                          cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
                                SELECT *
                                FROM Vaccines
-                               WHERE ManufactererName = 'Moderna'
+                               WHERE VaccineName = 'Pfizer'
                                '''
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -50,35 +52,33 @@ class TestCovid19(unittest.TestCase):
                 try:
                     # clear the tables before testing
                     clear_tables(sqlClient)
-                    self.vaccine_b = covid(manufac_name = 'Moderna',
-                                           days_between_doses = 28,
-                                           doses_in_stock = 100,
-                                           doses_reserved = 0,
-                                           cursor = cursor)
+                    covid(vaccine_name = 'Moderna',
+                         manufac_name = 'Moderna',
+                         doses_in_stock = 100,
+                         doses_reserved = 0,
+                         days_between_doses = 28,
+                         doses_per_patient = 2,
+                         cursor=cursor)
                     # get current doses
                     sqlQuery = '''
                                 SELECT *
                                 FROM Vaccines
-                                WHERE ManufactererName = 'Moderna'
+                                WHERE VaccineName = 'Moderna'
                             '''
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
                     current_stock = 0
                     for row in rows:
-                        current_stock += row["DosesInStock"]
+                        current_stock += row["AvailableDoses"]
                     
                     # add new doses and check that count changes
                     add_doses = 10
-                    vaccine_c = covid.add_doses('Moderna', add_doses, cursor)
-                    sqlQuery = '''
-                                SELECT *
-                                FROM Vaccines
-                                WHERE ManufactererName = 'Moderna'
-                            '''
+                    covid.add_doses('Moderna', add_doses, cursor)
+
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
                     for row in rows:
-                        check_stock = row["DosesInStock"]
+                        check_stock = row["AvailableDoses"]
                         if (add_doses + current_stock) != check_stock:
                             self.fail("Stock failed to add to database: " 
                                       + str(add_doses + current_stock) + "vs. "
@@ -88,7 +88,7 @@ class TestCovid19(unittest.TestCase):
                 except Exception:
                     # clear the tables if an exception occurred
                     clear_tables(sqlClient)
-                    self.fail("addDoses method failed")
+                    self.fail("add_doses method failed")
 
     def test_reserve_doses(self):
         """Test COVID19Vaccine.reserve_doses reserves the correct num of doses"""
@@ -100,38 +100,36 @@ class TestCovid19(unittest.TestCase):
                 try:
                     # clear the tables before testing
                     clear_tables(sqlClient)
-                    self.vaccine_c = covid(manufac_name = 'Moderna',
-                                           days_between_doses = 28,
-                                           doses_in_stock = 100,
-                                           doses_reserved = 0,
-                                           cursor = cursor)
+                    covid(vaccine_name = 'Pfizer',
+                          manufac_name = 'Pfizer-BioNTech',
+                          doses_in_stock = 100,
+                          doses_reserved = 0,
+                          days_between_doses = 21,
+                          doses_per_patient = 2,
+                          cursor=cursor)
                     # get current doses
                     sqlQuery = '''
                                 SELECT *
                                 FROM Vaccines
-                                WHERE ManufactererName = 'Moderna'
+                                WHERE VaccineName = 'Pfizer'
                             '''
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
                     current_stock = 0
                     current_reserved = 0
                     for row in rows:
-                        current_stock += row["DosesInStock"]
-                        current_reserved += row["DosesReserved"]
+                        current_stock += row["AvailableDoses"]
+                        current_reserved += row["ReservedDoses"]
                     
                     # add new doses and check that count changes
                     to_reserve = 10
-                    vaccine_d = covid.reserve_doses('Moderna', cursor)
-                    sqlQuery = '''
-                                SELECT *
-                                FROM Vaccines
-                                WHERE ManufactererName = 'Moderna'
-                            '''
+                    covid.reserve_doses('Pfizer', cursor)
+                    
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
                     for row in rows:
-                        check_stock = row["DosesInStock"]
-                        check_reserve = row["DosesReserved"]
+                        check_stock = row["AvailableDoses"]
+                        check_reserve = row["ReservedDoses"]
                         if ((current_stock - 2) != check_stock) & ((current_reserved + 2) != check_reserve):
                             self.fail("Stock failed to be reserved in database: " 
                                       + str(current_reserved) + "vs. "

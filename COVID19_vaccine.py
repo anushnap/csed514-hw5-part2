@@ -30,7 +30,7 @@ class COVID19Vaccine:
             # _identityRow = cursor.fetchone()
             # self.VaccineId = _identityRow['Identity']
             # # cursor.connection.commit()
-            print('Query executed successfully. Vaccine : ' + vaccine_name +  ' added to the database'
+            print('Query executed successfully. Vaccine : ' + vaccine_name +  ' added to the database')
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Vaccines!")
             print("Exception code: " + str(db_err.args[0]))
@@ -40,7 +40,7 @@ class COVID19Vaccine:
     
     def add_doses(vaccine_name, num_doses_added, cursor):
         '''Add doses to the vaccine inventory for a particular vaccine'''
-        sqltext = "UPDATE Vaccines SET DosesInStock = DosesInStock + "
+        sqltext = "UPDATE Vaccines SET AvailableDoses = AvailableDoses + "
         sqltext += str(num_doses_added)
         sqltext += " WHERE VaccineName = '"
         sqltext += str(vaccine_name) + "'"
@@ -59,7 +59,7 @@ class COVID19Vaccine:
 
     def reserve_doses(vaccine_name, cursor):
         '''reserve the vaccine doses associated with a specific patient who is being scheduled for vaccine administration'''
-        sqltext1 = "SELECT DosesInStock, DosesReserved FROM Vaccines WHERE VaccineName = '"
+        sqltext1 = "SELECT AvailableDoses, ReservedDoses, DosesPerPatient FROM Vaccines WHERE VaccineName = '"
         sqltext1 += str(vaccine_name) + "'"
         
         #get doses in stock and doses reserved
@@ -105,7 +105,7 @@ class COVID19Vaccine:
         sqltext2 = "UPDATE VACCINES SET AvailableDoses = "
         sqltext2 += str(doses_in_stock) + ", ReservedDoses = "
         sqltext2 += str(doses_reserved) + ", TotalDoses = "
-        sqltext2 += str(doses_in_stock + doses_reserved) + ", WHERE VaccineName = '"
+        sqltext2 += str(doses_in_stock + doses_reserved) + " WHERE VaccineName = '"
         sqltext2 += vaccine_name + "'"
 
         try: 
