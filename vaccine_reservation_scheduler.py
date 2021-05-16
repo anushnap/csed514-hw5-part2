@@ -17,7 +17,7 @@ class VaccineReservationScheduler:
     def __init__(self):
         return None
 
-    def PutHoldOnAppointmentSlot(self, cursor):
+    def PutHoldOnAppointmentSlot(self,cursor):
         ''' Method that reserves a CareGiver appointment slot &
         returns the unique scheduling slotid
         Should return 0 if no slot is available  or -1 if there is a database error'''
@@ -28,7 +28,7 @@ class VaccineReservationScheduler:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchall()
             self.slotSchedulingId = rows[0] # first open slot in db
-            return self.slotSchedulingId
+            return self.slotSchedulingId['CaregiverSlotSchedulingId']
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + str(db_err.args[0]))
