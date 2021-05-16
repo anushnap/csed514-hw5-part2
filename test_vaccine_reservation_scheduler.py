@@ -12,15 +12,22 @@ class TestReservationScheduler(unittest.TestCase):
     def test_init(self):
         scheduler()
     
-    def test_put_on_hold_returns_zero(self):
-        """PutOnHold returns 0"""
+    def test_put_on_hold_returns_neg2(self):
+        """PutOnHold returns -2"""
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
                                   Password=os.getenv("Password")) as sqlClient:
+            clear_tables(sqlClient)
             # get a cursor from the SQL connection
             with sqlClient.cursor(as_dict=True) as cursor:
-                self.assertEqual(scheduler().PutHoldOnAppointmentSlot(cursor), 0)
+                self.assertEqual(scheduler().PutHoldOnAppointmentSlot(cursor), -2)
+
+                # check no updates made to table
+                get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 1"
+                cursor.execute(get_schedule_sql)
+                rows = cursor.fetchall()
+                self.assertTrue(len(rows) < 1)
             
             clear_tables(sqlClient)
             
@@ -35,6 +42,12 @@ class TestReservationScheduler(unittest.TestCase):
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
                 self.assertEqual(scheduler().PutHoldOnAppointmentSlot(cursor), 0)
+
+                # check 1 update made to table
+                get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 1"
+                cursor.execute(get_schedule_sql)
+                rows = cursor.fetchall()
+                self.assertTrue(len(rows) == 1)
             
             clear_tables(sqlClient)
 

@@ -20,15 +20,25 @@ class VaccineReservationScheduler:
     def PutHoldOnAppointmentSlot(self,cursor):
         ''' Method that reserves a CareGiver appointment slot &
         returns the unique scheduling slotid
-        Should return 0 if no slot is available  or -1 if there is a database error'''
-        # Note to students: this is a stub that needs to replaced with your code
+        Should return -2 if no slot is available  or -1 if there is a database error'''
+        # Get first available appointment slot
         self.slotSchedulingId = 0
-        self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 ORDER BY WorkDay ASC"
+        self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
+        self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
         try:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchall()
-            self.slotSchedulingId = rows[0] # first open slot in db
-            return self.slotSchedulingId['CaregiverSlotSchedulingId']
+            self.slotSchedulingId = rows[0]['CaregiverSlotSchedulingId'] # first open slot in db
+
+            # Put appointment on hold
+            self.put_on_hold_sql = "UPDATE CareGiverSchedule "
+            self.put_on_hold_sql += "SET SlotStatus = 1 "
+            self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
+
+            cursor.execute(self.put_on_hold_sql)
+            cursor.connection.commit()
+            return self.slotSchedulingId
+        
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + str(db_err.args[0]))
@@ -37,9 +47,11 @@ class VaccineReservationScheduler:
             print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
             cursor.connection.rollback()
             return -1
+        
         except IndexError as idx_err:
             print("There are no available appointments at this time.")
-            return 0
+            cursor.connection.rollback()
+            return -2
 
     def ScheduleAppointmentSlot(self, slotid, cursor):
         '''method that marks a slot on Hold with a definite reservation  
@@ -98,6 +110,6 @@ if __name__ == '__main__':
 
             # Add patients
             # Schedule the patients
-            
+            vrs.PutHoldOnAppointmentSlot(dbcursor)
             # Test cases done!
             clear_tables(sqlClient)
