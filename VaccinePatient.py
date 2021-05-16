@@ -30,7 +30,8 @@ class VaccinePatient:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + self.sqltext)
 
-        def ReserveAppointment():
-
-        def Schedule Appointment():
+        def ReserveAppointment(CaregiverSchedulingID, Vaccine, cursor):
         	
+
+        def ScheduleAppointment():
+

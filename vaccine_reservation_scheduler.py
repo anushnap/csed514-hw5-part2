@@ -23,7 +23,7 @@ class VaccineReservationScheduler:
         Should return 0 if no slot is available  or -1 if there is a database error'''
         # Note to students: this is a stub that needs to replaced with your code
         self.slotSchedulingId = 0
-        self.getAppointmentSQL = "SELECT something..."
+        self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 ORDER BY WorkDay ASC"
         try:
             cursor.execute(self.getAppointmentSQL)
             cursor.connection.commit()
@@ -49,7 +49,7 @@ class VaccineReservationScheduler:
         if slotid < 1:
             return -2
         self.slotSchedulingId = slotid
-        self.getAppointmentSQL = "SELECT something... "
+        self.getAppointmentSQL = "SELECT "
         try:
             cursor.execute(self.getAppointmentSQL)
             return self.slotSchedulingId
