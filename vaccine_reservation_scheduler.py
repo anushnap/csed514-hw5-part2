@@ -49,7 +49,11 @@ class VaccineReservationScheduler:
         if slotid < 1:
             return -2
         self.slotSchedulingId = slotid
-        self.getAppointmentSQL = "SELECT "
+        self.getAppointmentSQL = "SELECT VaccineAppointmentId FROM VaccineAppointments WHERE SlotStatus = 1"
+        self.getAppointmentSQL += "AND VaccineAppointmentId = "
+        self.getAppointmentSQL += str(slotid) 
+
+
         try:
             cursor.execute(self.getAppointmentSQL)
             return self.slotSchedulingId
