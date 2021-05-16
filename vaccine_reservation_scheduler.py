@@ -23,11 +23,7 @@ class VaccineReservationScheduler:
         Should return 0 if no slot is available  or -1 if there is a database error'''
         # Note to students: this is a stub that needs to replaced with your code
         self.slotSchedulingId = 0
-<<<<<<< HEAD
         self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 ORDER BY WorkDay ASC"
-=======
-        self.getAppointmentSQL = "SELECT CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0"
->>>>>>> 4d4c7e2d7d1537ad7672ddfa73f11cb9a252b962
         try:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchall()
@@ -56,15 +52,10 @@ class VaccineReservationScheduler:
         if slotid < 1:
             return -2
         self.slotSchedulingId = slotid
-<<<<<<< HEAD
+
         self.getAppointmentSQL = "SELECT VaccineAppointmentId FROM VaccineAppointments WHERE SlotStatus = 1"
         self.getAppointmentSQL += "AND VaccineAppointmentId = "
         self.getAppointmentSQL += str(slotid) 
-
-
-=======
-        self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule"
->>>>>>> 4d4c7e2d7d1537ad7672ddfa73f11cb9a252b962
         try:
             cursor.execute(self.getAppointmentSQL)
             return self.slotSchedulingId
