@@ -8,27 +8,31 @@ from sql_connection_manager import SqlConnectionManager
 from vaccine_caregiver import VaccineCaregiver
 from enums import *
 from utils import *
-# from covid19_vaccine import COVID19Vaccine as covid
+from COVID19_vaccine import COVID19Vaccine as covid
 # from vaccine_patient import VaccinePatient as patient
 
 
 class VaccineReservationScheduler:
 
     def __init__(self):
-        return
+        return None
 
-    def PutHoldOnAppointmentSlot(self, cursor):
+    def PutHoldOnAppointmentSlot(self,cursor):
         ''' Method that reserves a CareGiver appointment slot &
         returns the unique scheduling slotid
         Should return 0 if no slot is available  or -1 if there is a database error'''
         # Note to students: this is a stub that needs to replaced with your code
         self.slotSchedulingId = 0
+<<<<<<< HEAD
         self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 ORDER BY WorkDay ASC"
+=======
+        self.getAppointmentSQL = "SELECT CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0"
+>>>>>>> 4d4c7e2d7d1537ad7672ddfa73f11cb9a252b962
         try:
             cursor.execute(self.getAppointmentSQL)
-            cursor.connection.commit()
-            return self.slotSchedulingId
-        
+            rows = cursor.fetchall()
+            self.slotSchedulingId = rows[0] # first open slot in db
+            return self.slotSchedulingId['CaregiverSlotSchedulingId']
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + str(db_err.args[0]))
@@ -37,6 +41,9 @@ class VaccineReservationScheduler:
             print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
             cursor.connection.rollback()
             return -1
+        except IndexError as idx_err:
+            print("There are no available appointments at this time.")
+            return 0
 
     def ScheduleAppointmentSlot(self, slotid, cursor):
         '''method that marks a slot on Hold with a definite reservation  
@@ -49,11 +56,15 @@ class VaccineReservationScheduler:
         if slotid < 1:
             return -2
         self.slotSchedulingId = slotid
+<<<<<<< HEAD
         self.getAppointmentSQL = "SELECT VaccineAppointmentId FROM VaccineAppointments WHERE SlotStatus = 1"
         self.getAppointmentSQL += "AND VaccineAppointmentId = "
         self.getAppointmentSQL += str(slotid) 
 
 
+=======
+        self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule"
+>>>>>>> 4d4c7e2d7d1537ad7672ddfa73f11cb9a252b962
         try:
             cursor.execute(self.getAppointmentSQL)
             return self.slotSchedulingId
@@ -86,7 +97,15 @@ if __name__ == '__main__':
                 caregivers[cgid] = cg
 
             # Add a vaccine and Add doses to inventory of the vaccine
-            # Ass patients
+            vaccines_list = []
+            vaccines_list.append(covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor))
+            vaccines_list.append(covid('Pfizer', 'Pfizer-BioNTech', 0, 0, 21, 2, dbcursor))
+            vaccines_list.append(covid('J&J', 'Johnson & Johnson/Janssen', 0, 0, 0, 1, dbcursor))
+            covid.add_doses('Moderna', 100, dbcursor)
+            covid.add_doses('Pfizer', 150, dbcursor)
+            covid.add_doses('J&J', 50, dbcursor)
+
+            # Add patients
             # Schedule the patients
             
             # Test cases done!
