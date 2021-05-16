@@ -1,4 +1,4 @@
-import pymssql
+import pymssql 
 
 class VaccinePatient:
 	'''Adds patient to Database'''
@@ -31,7 +31,7 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + self.sqltext)
 
         def ReserveAppointment(CaregiverSchedulingID, Vaccine, cursor):
-        	
+
 
         def ScheduleAppointment():
 
