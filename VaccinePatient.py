@@ -32,7 +32,7 @@ class VaccinePatient:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + self.sqltext)
 
-        def ReserveAppointment(CaregiverSchedulingID, Vaccine, cursor):
+        def ReserveAppointment(CaregiverSchedulingID, Vaccine, cursor): 
         	'''Validate caregiver slot ID and put on "Hold" status and create an entry 
         	in the VaccineAppointment Table flagged as "Queued for first dose"'''
 
