@@ -1,4 +1,6 @@
 import pymssql 
+from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccScheduler
+#from COVID19_vaccine.py import COVID19Vaccine as covidVacc
 
 class VaccinePatient:
 	'''Adds patient to Database'''
@@ -31,7 +33,28 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + self.sqltext)
 
         def ReserveAppointment(CaregiverSchedulingID, Vaccine, cursor):
+        	'''Validate caregiver slot ID and put on "Hold" status and create an entry 
+        	in the VaccineAppointment Table flagged as "Queued for first dose"'''
+
+        	#Select Caregiver slot IDs that are on hold
+        	openSlotCheck = VaccScheduler.PutHoldOnAppointmentSlot(CaregiverSchedulingID)
+
+        	if (openSlotCheck == -2):
+        		print("CAREGIVER SLOT NOT OPEN!")
+        	else:
+
+        		#Create an entry in the VaccineAppointmentsTable
+        		self.sqltext = "INSERT INTO VaccineAppointments ("
+        		self.sqltext += "VaccineAppointmentId, VaccineName) VALUES ("
+        		self.sqltext += str(openSlotCheck)
+				self.sqltext += getattr(Vaccine,'vaccine_name')
+
+        		#Flag the Patient as “Queued for 1st Dose”
+        		#not sure how to get infor about the patient and change their appointment status
+
+        		#Create a second appointment 3-6 weeks after the 1st appointment
 
 
-        def ScheduleAppointment():
+
+        def ScheduleAppointment(VaccineAppointmentID, cursor):
 
