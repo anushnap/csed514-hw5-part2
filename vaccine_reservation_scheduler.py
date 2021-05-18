@@ -21,23 +21,38 @@ class VaccineReservationScheduler:
         ''' Method that reserves a CareGiver appointment slot &
         returns the unique scheduling slotid
         Should return -2 if no slot is available  or -1 if there is a database error'''
-        # Get first available appointment slot
+
+        # Get first available caregiver appointment slot
         self.slotSchedulingId = 0
-        self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
+        #self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
+        #self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
+        self.getAppointmentSQL = "SELECT CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
         self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
+
         try:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchall()
             self.slotSchedulingId = rows[0]['CaregiverSlotSchedulingId'] # first open slot in db
 
-            # Put appointment on hold
-            self.put_on_hold_sql = "UPDATE CareGiverSchedule "
-            self.put_on_hold_sql += "SET SlotStatus = 1 "
-            self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
+            #check to see if there are no slots available
+            row_count = cursor.rowcount
+            print ("Number of slots available: {}".format(row_count))
+            
+            if row_count == 0:
+                print ("No slots available")
+            else:
+                # Put appointment on hold 
+                self.put_on_hold_sql = "UPDATE CareGiverSchedule "
+                self.put_on_hold_sql += "SET SlotStatus = 1 "
+                self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
+                cursor.execute(self.put_on_hold_sql)
+                cursor.connection.commit()
 
-            cursor.execute(self.put_on_hold_sql)
-            cursor.connection.commit()
-            return self.slotSchedulingId
+            #Query to get appointment slot
+            self.getAppointmentSlot = "SELECT VaccineAppointmentId FROM CareGiverSchedule "
+            self.getAppointmentSlot = "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
+
+            return self.getAppointmentSlot
         
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
@@ -109,7 +124,10 @@ if __name__ == '__main__':
             covid.add_doses('J&J', 50, dbcursor)
 
             # Add patients
+
+
             # Schedule the patients
             vrs.PutHoldOnAppointmentSlot(dbcursor)
+
             # Test cases done!
             clear_tables(sqlClient)
