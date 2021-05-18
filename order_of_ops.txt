@@ -1,0 +1,32 @@
+1. Create caregivers
+2. Create vaccines
+3. add doses to vaccines
+4. add patient info , status is new
+5. Schedule first dose
+    - Select a patient (from some queue?)
+    - Find first open caregiver schedule slot for first dose
+    - Update slotstatus on hold
+    - Add row into VaccineAppointmentsTable
+    - Update patient appointment status code from new to queued
+    - Update vaccine suppply reserved (reserved +2, stock -2)
+    - If sufficient vaccine supply, reserve appointment
+    - Update caregiver slot status from hold to scheduled
+    - Update patient appointment status from queued to scheduled
+6. Update patient statuses
+    - Update patient appointment status from scheduled to "1st dose administered"
+    - Update vaccine supply reserved (reserved -1)
+7. Schedule 2nd dose
+    - Select a patient (from some queue?)
+    - Find first open caregiver schedule slot for second dose in 3 - 6 weeks
+    - Update slotstatus on hold
+    - Add row into VaccineAppointmentsTable
+    - Update patient appointment status code from administered to queued for 2nd dose 
+    - vaccine suppply already reserved 
+    - Don't need to check If sufficient vaccine supply, reserve appointment
+    - Update caregiver slot status from hold to scheduled
+    - Update patient appointment status from queued to scheduled for 2nd dose
+    - Repeat for all patients
+8. Update patient statuses
+    - Update patient appointment status from scheduled for 2nd dose to 2nd dose administered
+    - Update vaccine supply reserved (reserved -1)
+9. Update prior code to handle single-dose vaccine like J&J
