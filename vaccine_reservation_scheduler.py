@@ -24,10 +24,10 @@ class VaccineReservationScheduler:
 
         # Get first available caregiver appointment slot
         self.slotSchedulingId = 0
-        #self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
-        #self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
-        self.getAppointmentSQL = "SELECT CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
+        self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
         self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
+        # self.getAppointmentSQL = "SELECT CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
+        # self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
 
         try:
             cursor.execute(self.getAppointmentSQL)
