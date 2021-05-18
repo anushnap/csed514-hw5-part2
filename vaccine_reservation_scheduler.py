@@ -40,7 +40,7 @@ class VaccineReservationScheduler:
             print ("Number of slots available: {}".format(row_count))
             
             if row_count == 0:
-                return "No slots available"
+                return -2
             else:
                 # Put appointment on hold 
                 self.put_on_hold_sql = "UPDATE CareGiverSchedule "
