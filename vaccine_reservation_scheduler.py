@@ -17,13 +17,14 @@ class VaccineReservationScheduler:
     def __init__(self):
         return None
 
-    def PutHoldOnAppointmentSlot(self,cursor):
+    def PutHoldOnAppointmentSlot(self, caregiverSlot, cursor):
         ''' Method that reserves a CareGiver appointment slot &
         returns the unique scheduling slotid
         Should return -2 if no slot is available  or -1 if there is a database error'''
 
         # Get first available caregiver appointment slot
-        self.slotSchedulingId = 0
+        #self.slotSchedulingId = 0
+        self.slotSchedulingId = caregiverSlot
         self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
         self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
         # self.getAppointmentSQL = "SELECT CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
@@ -39,7 +40,7 @@ class VaccineReservationScheduler:
             print ("Number of slots available: {}".format(row_count))
             
             if row_count == 0:
-                print ("No slots available")
+                return "No slots available"
             else:
                 # Put appointment on hold 
                 self.put_on_hold_sql = "UPDATE CareGiverSchedule "
@@ -48,11 +49,12 @@ class VaccineReservationScheduler:
                 cursor.execute(self.put_on_hold_sql)
                 cursor.connection.commit()
 
-            #Query to get appointment slot
-            self.getAppointmentSlot = "SELECT VaccineAppointmentId FROM CareGiverSchedule "
-            self.getAppointmentSlot = "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
+                #Query to get appointment slot
+                self.getAppointmentSlot = "SELECT VaccineAppointmentId FROM CareGiverSchedule "
+                self.getAppointmentSlot = "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
 
-            return self.getAppointmentSlot
+                return self.getAppointmentSlot
+
         
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
