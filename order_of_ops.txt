@@ -8,8 +8,8 @@
     - Update slotstatus on hold
     - Add row into VaccineAppointmentsTable
     - Update patient appointment status code from new to queued
-    - Update vaccine suppply reserved (reserved +2, stock -2)
     - If sufficient vaccine supply, reserve appointment
+    - Update vaccine suppply reserved (reserved +2, stock -2)
     - Update caregiver slot status from hold to scheduled
     - Update patient appointment status from queued to scheduled
 6. Update patient statuses
