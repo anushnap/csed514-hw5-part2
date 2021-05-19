@@ -33,3 +33,18 @@
     - Update patient appointment status from scheduled for 2nd dose to 2nd dose administered
     - Update vaccine supply reserved (reserved -1)
 9. Update prior code to handle single-dose vaccine like J&J
+
+--------------------------------------------------------------
+
+main():
+    get list of caregivers
+    input the vaccines & stock into db
+    get a list of patients
+    for each patient p:
+        make a cursor
+        try:
+            scheduleappointment // this calls putonhold, deplete_reserve, etc...
+            cursor.connection.commit()
+        except:
+            print "oops error"
+            cursor.connection.rollback()
