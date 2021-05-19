@@ -64,47 +64,37 @@ class VaccineReservationScheduler:
             cursor.connection.rollback()
             return -2
 
-    def PutHoldOnAppointment2(self, date_first_dose, days_between_doses, cursor):
+    def PutHoldOnAppointment2(self, caregiver_slotid_first_dose, days_between_doses, cursor):
         ''' Method that reserves a CareGiver appointment slot &
         returns the unique scheduling slotid for second dose shot
         Returns -2 if no slot is available
         Returns -1 if there is a database error'''
 
-        # Get first available caregiver appointment slot at least
-        # days_between_doses days after date_first_dose
-        self.slotSchedulingId = 0
-        self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
-        self.getAppointmentSQL = "AND "
-        self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
+        # Get datetime from first dose
+        getDateSQL = "SELECT WorkDay from CareGiverSchedule WHERE "
+        getDateSQL += "CaregiverSlotSchedulingId = " + str(caregiver_slotid_first_dose)
 
         try:
-            cursor.execute(self.getAppointmentSQL)
+            cursor.execute(self.getDateSQL)
             rows = cursor.fetchall()
-            self.slotSchedulingId = rows[0]['CaregiverSlotSchedulingId'] # first open slot in db
-
-            # Put appointment on hold 
-            self.put_on_hold_sql = "UPDATE CareGiverSchedule "
-            self.put_on_hold_sql += "SET SlotStatus = 1 "
-            self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
-            cursor.execute(self.put_on_hold_sql)
-            cursor.connection.commit()
-
-            return self.slotSchedulingId
-
+            first_dose_date = rows[0]['WorkDay']
+            
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])           
             print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
-            cursor.connection.rollback()
-            return -1
-        
-        # No appointments available
-        except IndexError as idx_err:
-            print("There are no available appointments at this time.")
-            cursor.connection.rollback()
-            return -2
+            
+        # Get first available caregiver appointment slot at least
+        # days_between_doses days after date_first_dose
+        date_next_dose = first_dose_date.strftime('%Y-%m-%d') + timedelta(days = days_between_doses)
+        date_next_dose_fmt = date_first_dose.strftime('%Y-%m-%d')
+        self.slotSchedulingId = 0
+        self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
+        self.getAppointmentSQL = "AND WorkDay >= '" + date_next_dose_fmt + "' " 
+        self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
+
     
     def ScheduleAppointmentSlot(self, slotid, cursor):
         '''method that marks a slot on Hold with a definite reservation  
