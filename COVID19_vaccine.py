@@ -85,7 +85,7 @@ class COVID19Vaccine:
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])
-            print("SQL text that resulted in an Error: " + sqltext)
+            print("SQL text that resulted in an Error: " + sqltext1)
 
         if doses_needed == 2:
             #check if there are enough in stock and reserve
