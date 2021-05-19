@@ -141,5 +141,43 @@ class TestCovid19(unittest.TestCase):
                     clear_tables(sqlClient)
                     self.fail("reserve_doses method failed")
 
+    def test_deplete_reserve(self):
+        """Test COVID19Vaccine.deplete_reserve reduces reserves by 1"""
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                try:
+                    # clear the tables before testing
+                    clear_tables(sqlClient)
+                    reserve = 2
+                    covid(vaccine_name = 'Pfizer',
+                          manufac_name = 'Pfizer-BioNTech',
+                          doses_in_stock = 0,
+                          doses_reserved = reserve,
+                          days_between_doses = 21,
+                          doses_per_patient = 2,
+                          cursor=cursor)
+                    
+                    # reduce reserve and check that count changes
+                    covid.deplete_reserve('Pfizer', cursor)
+                    sqlQuery = "SELECT * FROM Vaccines WHERE "
+                    sqlQuery += "VaccineName = 'Pfizer'"
+
+                    cursor.execute(sqlQuery)
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        check_reserve = row["ReservedDoses"]
+                        if (reserve - 1) != check_reserve:
+                            self.fail("Stock failed to be depleted in database")
+                    
+                    # clear the tables after testing, just in-case
+                    clear_tables(sqlClient)
+                except Exception:
+                    # clear the tables if an exception occurred
+                    clear_tables(sqlClient)
+                    self.fail("deplete_reserve method failed")
+
 if __name__ == '__main__':
     unittest.main()

@@ -124,11 +124,11 @@ class COVID19Vaccine:
     def deplete_reserve(vaccine_name, cursor):
         """ Remove 1 vaccine from reserved amount after successful appointment """
         '''reserve the vaccine doses associated with a specific patient who is being scheduled for vaccine administration'''
-        self.sqltext = "UPDATE Vaccines SET ReservedDoses = ReservedDoses - 1 "
-        self.sqltext += "WHERE VaccineName = '" + vaccine_name + "'"
+        sqltext = "UPDATE Vaccines SET ReservedDoses = ReservedDoses - 1 "
+        sqltext += "WHERE VaccineName = '" + vaccine_name + "'"
         
         try: 
-            cursor.execute(self.sqltext)
+            cursor.execute(sqltext)
             cursor.connection.commit()
             print("Query executed successfully.")
         
