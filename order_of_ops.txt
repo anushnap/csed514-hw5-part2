@@ -3,12 +3,15 @@
 3. add doses to vaccines
 4. add patient info , status is new
 5. Schedule first dose
+	RESERVE APPOINTMENT FUNCTION
     - Select a patient (from some queue?)
     - Find first open caregiver schedule slot for first dose
     - Update slotstatus on hold
     - Add row into VaccineAppointmentsTable
     - Update patient appointment status code from new to queued
-    - If sufficient vaccine supply, reserve appointment
+    - Schedule second appointment 
+	SCHEDULE APPOINTMENT FUNCTION
+    - If sufficient vaccine supply, schedule appointment
     - Update vaccine suppply reserved (reserved +2, stock -2)
     - Update caregiver slot status from hold to scheduled
     - Update patient appointment status from queued to scheduled
