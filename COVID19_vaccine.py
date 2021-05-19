@@ -31,7 +31,9 @@ class COVID19Vaccine:
             # self.VaccineId = _identityRow['Identity']
             # # cursor.connection.commit()
             print('Query executed successfully. Vaccine : ' + vaccine_name +  ' added to the database')
+        
         except pymssql.Error as db_err:
+            cursor.connection.rollback()
             print("Database Programming Error in SQL Query processing for Vaccines!")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
@@ -49,13 +51,14 @@ class COVID19Vaccine:
             cursor.execute(sqltext)
             cursor.connection.commit()
             print("Query executed successfully.")
+        
         except pymssql.Error as db_err:
+            cursor.connection.rollback()
             print("Database Programming Error in SQL Query processing for Vaccines!")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + sqltext)
-
 
     def reserve_doses(vaccine_name, cursor):
         '''reserve the vaccine doses associated with a specific patient who is being scheduled for vaccine administration'''
@@ -76,6 +79,7 @@ class COVID19Vaccine:
                 doses_needed += row['DosesPerPatient']
             
             print("Query executed successfully.")
+        
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for ReserveDoses")
             print("Exception code: " + str(db_err.args[0]))
@@ -88,10 +92,6 @@ class COVID19Vaccine:
             if doses_in_stock >= 2:
                 doses_reserved += 2
                 doses_in_stock -= 2
-            elif doses_in_stock == 1:
-                doses_reserved += 1
-                doses_in_stock -= 1
-                print("WARNING: STOCK DEPLETED. ONLY ONE DOSE RESERVED")
             else:
                 print("WARNING: Not enough vaccines in stock! CANNOT RESERVE")
         else:
@@ -112,8 +112,29 @@ class COVID19Vaccine:
             cursor.execute(sqltext2)
             cursor.connection.commit()
             print("Query executed successfully.")
+        
         except pymssql.Error as db_err:
+            cursor.connection.rollback()
             print("Database Programming Error in SQL Query processing for ReserveDoses!")
+            print("Exception code: " + str(db_err.args[0]))
+            if len(db_err.args) > 1:
+                print("Exception message: " + db_err.args[1])
+            print("SQL text that resulted in an Error: " + sqltext)
+
+    def deplete_reserve(vaccine_name, cursor):
+        """ Remove 1 vaccine from reserved amount after successful appointment """
+        '''reserve the vaccine doses associated with a specific patient who is being scheduled for vaccine administration'''
+        self.sqltext = "UPDATE Vaccines SET ReservedDoses = ReservedDoses - 1 "
+        self.sqltext += "WHERE VaccineName = '" + vaccine_name + "'"
+        
+        try: 
+            cursor.execute(self.sqltext)
+            cursor.connection.commit()
+            print("Query executed successfully.")
+        
+        except pymssql.Error as db_err:
+            cursor.connection.rollback()
+            print("Database Programming Error in SQL Query processing for ReserveDoses")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])
