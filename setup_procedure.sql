@@ -10,13 +10,13 @@ GO
 
 
 --- Drop commands to restructure the DB
-Drop Table Vaccines
-Drop Table Patients
 Drop Table VaccineAppointments
 Drop Table CareGiverSchedule
 Drop Table AppointmentStatusCodes
-Drop Table PatientAppointmentStatusCodes
 Drop Table Caregivers
+Drop Table Vaccines
+Drop Table Patients
+Drop Table PatientAppointmentStatusCodes
 Go
 
 --- Commands to clear the active database Tables for unit testing
@@ -136,8 +136,8 @@ Create Table VaccineAppointments(
 		DoseNumber int
 	);
 
-ALTER TABLE CareGiverSchedule
-	ADD FOREIGN KEY (VaccineAppointmentId)
-	REFERENCES VaccineAppointments(VaccineAppointmentId)
-;
+-- ALTER TABLE CareGiverSchedule
+-- 	ADD FOREIGN KEY (VaccineAppointmentId)
+-- 	REFERENCES VaccineAppointments(VaccineAppointmentId)
+-- ;
 GO
