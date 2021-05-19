@@ -95,7 +95,6 @@ class VaccineReservationScheduler:
         self.getAppointmentSQL = "AND WorkDay >= '" + date_next_dose_fmt + "' " 
         self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
 
-    
     def ScheduleAppointmentSlot(self, slotid, cursor):
         '''method that marks a slot on Hold with a definite reservation  
         slotid is the slot that is currently on Hold and whose status will be updated 
