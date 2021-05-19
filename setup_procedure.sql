@@ -1,7 +1,7 @@
 Use CoronaVirus
 GO
 
-InitScheduerApp
+EXEC InitScheduerApp;
 
 
 IF OBJECT_ID ( 'InitScheduerApp', 'P' ) IS NOT NULL
@@ -116,7 +116,9 @@ Create Table Vaccines(
 
 Create Table VaccineAppointments(
  		VaccineAppointmentId int Identity PRIMARY Key, 
-		VaccineName varchar(50) ,
+		VaccineName varchar(50) 
+			CONSTRAINT FK_VaccineAppointmentVaccineName FOREIGN KEY (VaccineName)
+			REFERENCES Vaccines(VaccineName),
 		PatientId int
 			CONSTRAINT FK_VaccineAppointmentPatientID FOREIGN KEY (PatientId)
 			REFERENCES Patients(PatientId),
@@ -132,4 +134,10 @@ Create Table VaccineAppointments(
 			REFERENCES AppointmentStatusCodes(statusCodeId), 
 		DateAdministered datetime,
 		DoseNumber int
-);
+	);
+
+ALTER TABLE CareGiverSchedule
+	ADD FOREIGN KEY (VaccineAppointmentId)
+	REFERENCES VaccineAppointments(VaccineAppointmentId)
+;
+GO
