@@ -21,7 +21,7 @@ class TestReservationScheduler(unittest.TestCase):
             clear_tables(sqlClient)
             # get a cursor from the SQL connection
             with sqlClient.cursor(as_dict=True) as cursor:
-                self.assertEqual(scheduler().PutHoldOnAppointmentSlot(cursor), -2)
+                self.assertEqual(scheduler().PutHoldOnAppointment1(cursor), -2)
 
                 # check no updates made to table
                 get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 1"
@@ -41,7 +41,7 @@ class TestReservationScheduler(unittest.TestCase):
             # get a cursor from the SQL connection
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
-                self.assertEqual(scheduler().PutHoldOnAppointmentSlot(cursor), 0)
+                self.assertEqual(scheduler().PutHoldOnAppointment1(cursor), 0)
 
                 # check 1 update made to table
                 get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 1"
