@@ -26,7 +26,6 @@ class VaccineReservationScheduler:
 
         # Get first available caregiver appointment slot
         self.slotSchedulingId = 0
-        # self.slotSchedulingId = caregiverSlot
         self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
         self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
 
@@ -40,13 +39,8 @@ class VaccineReservationScheduler:
             self.put_on_hold_sql += "SET SlotStatus = 1 "
             self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
             cursor.execute(self.put_on_hold_sql)
-            cursor.connection.commit()
+            # cursor.connection.commit()
 
-            #Query to get appointment slot
-            # self.getAppointmentSlot = "SELECT VaccineAppointmentId FROM CareGiverSchedule "
-            # self.getAppointmentSlot = "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
-
-            # return self.getAppointmentSlot
             return self.slotSchedulingId
 
         except pymssql.Error as db_err:
@@ -55,13 +49,13 @@ class VaccineReservationScheduler:
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])           
             print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
-            cursor.connection.rollback()
+            # cursor.connection.rollback()
             return -1
         
         # No appointments available
         except IndexError as idx_err:
             print("There are no available appointments at this time.")
-            cursor.connection.rollback()
+            # cursor.connection.rollback()
             return -2
 
     def PutHoldOnAppointment2(self, caregiver_slotid_first_dose, days_between_doses, cursor):
@@ -75,25 +69,52 @@ class VaccineReservationScheduler:
         getDateSQL += "CaregiverSlotSchedulingId = " + str(caregiver_slotid_first_dose)
 
         try:
-            cursor.execute(self.getDateSQL)
-            rows = cursor.fetchall()
-            first_dose_date = rows[0]['WorkDay']
+            cursor.execute(getDateSQL)
+            row = cursor.fetchone()
+            first_dose_date = row['WorkDay']
             
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])           
-            print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
+            print("SQL text that resulted in an Error: " + getAppointmentSQL)
             
-        # Get first available caregiver appointment slot at least
-        # days_between_doses days after date_first_dose
-        date_next_dose = first_dose_date.strftime('%Y-%m-%d') + timedelta(days = days_between_doses)
-        date_next_dose_fmt = date_first_dose.strftime('%Y-%m-%d')
+        # Calculate minimum date of next appointment
+        date_next_dose = datetime.fromisoformat(first_dose_date) + timedelta(days = days_between_doses)
+        date_next_dose_fmt = date_next_dose.strftime('%Y-%m-%d')
         self.slotSchedulingId = 0
         self.getAppointmentSQL = "SELECT TOP 1 CaregiverSlotSchedulingId FROM CareGiverSchedule WHERE SlotStatus = 0 " 
-        self.getAppointmentSQL = "AND WorkDay >= '" + date_next_dose_fmt + "' " 
+        self.getAppointmentSQL += "AND WorkDay >= '" + date_next_dose_fmt + "' " 
         self.getAppointmentSQL += "ORDER BY WorkDay ASC, SlotHour ASC, SlotMinute ASC"
+        
+        try:
+            # Get first available slotschedulingid
+            cursor.execute(self.getAppointmentSQL)
+            row = cursor.fetchone()
+            
+            # Return -2 if no available slotschedulingid, else return slotschedulingid.
+            if row is None:
+                print("There are no available appointments at this time.")
+                return -2
+            else: 
+                # Put appointment slot on hold 
+                self.slotSchedulingId = row['CaregiverSlotSchedulingId']
+                self.put_on_hold_sql = "UPDATE CareGiverSchedule "
+                self.put_on_hold_sql += "SET SlotStatus = 1 "
+                self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
+                cursor.execute(self.put_on_hold_sql)
+                # cursor.connection.commit()
+
+                return self.slotSchedulingId
+        
+        except pymssql.Error as db_err:
+            print("Database Programming Error in SQL Query processing! ")
+            print("Exception code: " + str(db_err.args[0]))
+            if len(db_err.args) > 1:
+                print("Exception message: " + db_err.args[1])           
+            print("SQL text that resulted in an Error: " + getAppointmentSQL)
+            return -1
 
     def ScheduleAppointmentSlot(self, slotid, cursor):
         '''method that marks a slot on Hold with a definite reservation  
@@ -152,9 +173,7 @@ if __name__ == '__main__':
 
             # Add patients
 
-
             # Schedule the patients
-            vrs.PutHoldOnAppointmentSlot(dbcursor)
 
             # Test cases done!
             clear_tables(sqlClient)
