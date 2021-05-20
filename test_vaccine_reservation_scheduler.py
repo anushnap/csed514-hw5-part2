@@ -90,7 +90,40 @@ class TestReservationScheduler(unittest.TestCase):
                 self.assertTrue(len(rows) < 1)
             
             clear_tables(sqlClient)
+    
+    def test_schedule_appointment_returns_neg2(self):
+        """ScheduleAppointmentSlot returns -2"""
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                vc = VaccineCaregiver('Carrie Nation', cursor)
+                self.assertEqual(scheduler().ScheduleAppointmentSlot(-1, cursor), -2)
+                self.assertEqual(scheduler().ScheduleAppointmentSlot("Not a valid id", cursor), -2)
+                get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 2"
+                cursor.execute(get_schedule_sql)
+                rows = cursor.fetchall()
+                self.assertTrue(len(rows) < 1)
+            
+            clear_tables(sqlClient)
 
+    def test_schedule_appointment(self):
+        """ScheduleAppointmentSlot returns id"""
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                vc = VaccineCaregiver('Carrie Nation', cursor)
+                self.assertEqual(scheduler().ScheduleAppointmentSlot(1, cursor), 1)
+
+                get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 2"
+                cursor.execute(get_schedule_sql)
+                rows = cursor.fetchall()
+                self.assertTrue(len(rows) == 1)
+            
+            clear_tables(sqlClient)
 
 if __name__ == "__main__":
     unittest.main()
