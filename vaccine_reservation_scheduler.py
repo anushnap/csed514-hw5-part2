@@ -116,31 +116,53 @@ class VaccineReservationScheduler:
             print("SQL text that resulted in an Error: " + getAppointmentSQL)
             return -1
 
-    def ScheduleAppointmentSlot(self, slotid, cursor):
-        '''method that marks a slot on Hold with a definite reservation  
-        slotid is the slot that is currently on Hold and whose status will be updated 
-        returns the same slotid when the database update succeeds 
-        returns 0 is there if the database update fails 
-        returns -1 the same slotid when the database command fails
-        returns 21 if the slotid parm is invalid '''
-        # Note to students: this is a stub that needs to replaced with your code
-        if slotid < 1:
-            return -2
-        self.slotSchedulingId = slotid
+    def ScheduleAppointmentSlot(self, caregiver_slotid, appointment_id, cursor):
+        '''Marks a slot on Hold with a definite reservation in CaregiverSchedule and VaccineAppointments.  
+        slotid is the caregiver slot id that is currently on Hold and whose status will be updated 
+        returns the same slotid when the database update succeeds
+        returns -1 is there if the database update fails 
+        returns -2 if the slotid parm is invalid '''
 
-        self.getAppointmentSQL = "SELECT VaccineAppointmentId FROM VaccineAppointments WHERE SlotStatus = 1"
-        self.getAppointmentSQL += "AND VaccineAppointmentId = "
-        self.getAppointmentSQL += str(slotid) 
+        if (slotid < 0) or (is_instance(slotid, int) is False):
+            return -2
+
+        self.slotSchedulingId = caregiver_slotid
+        self.appointment_id = appointment_id
+
+        # Update the CaregiverSchedule table from Hold to Scheduled
+        self.updateCaregiverSql = "UPDATE CaregiverSchedule "
+        self.updateCaregiverSql += "SET SlotStatus = 2 "
+        self.updateCaregiverSql += "WHERE CaregiverSlotScheduleId = "
+        self.updateCaregiverSql += str(caregiver_slotid)
+        
         try:
-            cursor.execute(self.getAppointmentSQL)
-            return self.slotSchedulingId
+            cursor.execute(self.updateCaregiverSql)
+        
         except pymssql.Error as db_err:    
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + db_err.args[0])
             if len(db_err.args) > 1:
                 print("Exception message: " + str(db_err.args[1]))  
-            print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
+            print("SQL text that resulted in an Error: " + self.updateCaregiverSql)
             return -1
+        
+        # Update VaccineAppointments table from Hold to Scheduled
+        self.updateAppointmentSql = "UPDATE VaccineAppointments "
+        self.updateAppointmentSql += "SET SlotStatus = 2 "
+        self.updateAppointmentSql += "WHERE VaccineAppointmentId = " + str(appointment_id)
+
+        try:
+            cursor.execute(self.updateAppointmentSql)
+        
+        except pymssql.Error as db_err:    
+            print("Database Programming Error in SQL Query processing! ")
+            print("Exception code: " + db_err.args[0])
+            if len(db_err.args) > 1:
+                print("Exception message: " + str(db_err.args[1]))  
+            print("SQL text that resulted in an Error: " + self.updateAppointmentSql)
+            return -1
+        
+        return self.slotSchedulingId
 
 if __name__ == '__main__':
         with SqlConnectionManager(Server=os.getenv("Server"),

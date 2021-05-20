@@ -83,6 +83,7 @@ class VaccinePatient:
         sqlCreateAppt += str(ReservationStartHour) + ", "
         sqlCreateAppt += str(ReservationStartMinute) + ", "
         sqlCreateAppt += str(AppointmentDuration) + ", "
+        sqlCreateAppt += str(SlotStatus) + ", "
         sqlCreateAppt += str(DateAdministered) + ", "
         sqlCreateAppt += str(DoseNumber) + ")"
 
@@ -131,6 +132,7 @@ class VaccinePatient:
         sqlCreateAppt2 += str(ReservationStartHour) + ", "
         sqlCreateAppt2 += str(ReservationStartMinute) + ", "
         sqlCreateAppt2 += str(AppointmentDuration) + ", "
+        sqlCreateAppt2 += str(SlotStatus) + ", "
         sqlCreateAppt2 += str(DateAdministered) + ", "
         sqlCreateAppt2 += str(DoseNumber) + ")"
 
