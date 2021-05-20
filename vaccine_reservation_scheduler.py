@@ -10,7 +10,7 @@ from vaccine_caregiver import VaccineCaregiver
 from enums import *
 from utils import *
 from COVID19_vaccine import COVID19Vaccine as covid
-# from vaccine_patient import VaccinePatient as patient
+from vaccine_patient import VaccinePatient as patient
 
 
 class VaccineReservationScheduler:
@@ -199,11 +199,14 @@ if __name__ == '__main__':
 
                 # Add patients
                 patientList = []
-                patientList.append()
-                patientList.append()
+                patientList.append(patient('Spongebob Squarepants', 0, dbcursor))
+                patientList.append(patient('Sandy Cheeks', 0, dbcursor))
+                patientList.append(patient('Squidward', 0, dbcursor))
+                patientList.append(patient('Patrick Star', 0, dbcursor))
+                patientList.append(patient('Mr. Krabs', 0, dbcursor))
                 patients = {}
                 for pt in patientList:
-                    ptid = cg.patientId
+                    ptid = pt.patientId
                     patients[ptid] = pt
 
             with sqlClient.cursor(as_dict = True) as dbcursor:
