@@ -208,7 +208,7 @@ class VaccinePatient:
 
         sqlUpdateSlotStatuses = VaccScheduler.ScheduleAppointmentSlot(CaregiverSlotID, VaccineAppointmentID)
 
-        # if (sqlUpdatePatientStatus < 0):
+        # if (sqlUpdatePatientStatus < 0): 
         #     print("Slot statuses not updated")
 
         #======================================================================
