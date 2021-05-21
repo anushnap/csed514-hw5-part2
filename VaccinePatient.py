@@ -36,19 +36,18 @@ class VaccinePatient:
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "
-        sqlSelectCaregiverSlot += str(openSlotCheck)
+        sqlSelectCaregiverSlot += str(CaregiverSchedulingID)
 
         try: 
             cursor.execute(sqlSelectCaregiverSlot)
             row = cursor.fetchone()
 
             CaregiverId = row['CaregiverId']
-            ReservationDate = row['WorkDay']
+            ReservationDate = "'" + row['WorkDay'] + "'"
             ReservationStartHour = row['SlotHour']
             ReservationStartMinute = row['SlotMinute']
             AppointmentDuration = 15
             SlotStatus = row['SlotStatus']
-            DateAdministered = NULL 
             DoseNumber = 1
 
             #print("Query executed successfully.")
@@ -65,9 +64,9 @@ class VaccinePatient:
         #Insert first appointment to VaccineAppointments table
         sqlCreateAppt = "INSERT INTO VaccineAppointments ("
         sqlCreateAppt += "VaccineName, PatientId, CaregiverId, ReservationDate, ReservationStartHour, "
-        sqlCreateAppt += "ReservationStartMinute, AppointmentDuration, SlotStatus, DateAdministered, "
-        sqlCreateAppt += "DoseNumber) VALUES ("
-        sqlCreateAppt += getattr(Vaccine,'vaccine_name') + ", "
+        sqlCreateAppt += "ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber) "
+        sqlCreateAppt += "VALUES ("
+        sqlCreateAppt += "'" + getattr(Vaccine,'vaccine_name') + "', "
         sqlCreateAppt += str(self.patientId) + ", "
         sqlCreateAppt += str(CaregiverId)  + ", "
         sqlCreateAppt += str(ReservationDate) + ", "
@@ -75,7 +74,6 @@ class VaccinePatient:
         sqlCreateAppt += str(ReservationStartMinute) + ", "
         sqlCreateAppt += str(AppointmentDuration) + ", "
         sqlCreateAppt += str(SlotStatus) + ", "
-        sqlCreateAppt += str(DateAdministered) + ", "
         sqlCreateAppt += str(DoseNumber) + ")"
 
         appointmentId = 0 #primary key
@@ -99,7 +97,7 @@ class VaccinePatient:
         #update caregiver schedule and set vaccine appiontment id from 0 -> unique value
 
         sqlUpdateAppointmentID = "UPDATE CaregiverSchedule SET VaccineAppointmentId = "
-        sqlUpdateAppointmentID += str(appointmentId)
+        sqlUpdateAppointmentID += str(appointmentId) + " "
         sqlUpdateAppointmentID += "WHERE CaregiverSlotSchedulingId = "
         sqlUpdateAppointmentID += str(CaregiverSchedulingID)
 
@@ -135,7 +133,7 @@ class VaccinePatient:
 		#Create a second appointment 3-6 weeks after the 1st appointment
 
         #Check for first available slot in 3-6 weeks time
-        openSlotCheck2 = VaccScheduler.PutHoldOnAppointment2(CaregiverSchedulingID, getattr(Vaccine,'days_between_doses'))
+        openSlotCheck2 = VaccScheduler().PutHoldOnAppointment2(CaregiverSchedulingID, getattr(Vaccine,'days_between_doses'), cursor)
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot2 = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "
@@ -146,12 +144,11 @@ class VaccinePatient:
             row = cursor.fetchone()
 
             CaregiverId = row['CaregiverId']
-            ReservationDate = row['WorkDay']
+            ReservationDate = "'" + row['WorkDay'] + "'"
             ReservationStartHour = row['SlotHour']
             ReservationStartMinute = row['SlotMinute']
             AppointmentDuration = 15
             SlotStatus = row['SlotStatus']
-            DateAdministered = NULL 
             DoseNumber = 2
 
         except pymssql.Error as db_err:
@@ -165,9 +162,9 @@ class VaccinePatient:
         #Insert second appointment to VaccineAppointments table
         sqlCreateAppt2 = "INSERT INTO VaccineAppointments ("
         sqlCreateAppt2 += "VaccineName, PatientId, CaregiverId, ReservationDate, ReservationStartHour, "
-        sqlCreateAppt2 += "ReservationStartMinute, AppointmentDuration, SlotStatus, DateAdministered, "
-        sqlCreateAppt2 += "DoseNumber) VALUES ("
-        sqlCreateAppt2 += getattr(Vaccine,'vaccine_name') + ", "
+        sqlCreateAppt2 += "ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber) "
+        sqlCreateAppt2 += "VALUES ("
+        sqlCreateAppt2 += "'" + getattr(Vaccine,'vaccine_name') + "', "
         sqlCreateAppt2 += str(self.patientId) + ", "
         sqlCreateAppt2 += str(CaregiverId) + ", "
         sqlCreateAppt2 += str(ReservationDate) + ", "
@@ -175,7 +172,6 @@ class VaccinePatient:
         sqlCreateAppt2 += str(ReservationStartMinute) + ", "
         sqlCreateAppt2 += str(AppointmentDuration) + ", "
         sqlCreateAppt2 += str(SlotStatus) + ", "
-        sqlCreateAppt2 += str(DateAdministered) + ", "
         sqlCreateAppt2 += str(DoseNumber) + ")"
         
         appointmentId2 = 0 #primary key
@@ -200,10 +196,20 @@ class VaccinePatient:
         '''update the Patient’s VaccineStatus from "Queued for first dose" to 1st Dose Scheduled
             maintain the Vaccine inventory'''
 
-        #maintain vaccine inventory
+        #======================================================================
+        #Maintain vaccine inventory
 
-        #check that Slot statuses are on hold
+        #Reserve 2 doses
+        CovidVaccine.reserve_doses(getattr(Vaccine,'vaccine_name'))
 
+        #======================================================================
+        #Update caregiver slot status from hold to scheduled
+        #Update vaccineappointment slot status from hold to scheduled
+
+        sqlUpdateSlotStatuses = VaccScheduler.ScheduleAppointmentSlot(CaregiverSlotID, VaccineAppointmentID)
+
+        # if (sqlUpdatePatientStatus < 0):
+        #     print("Slot statuses not updated")
 
         #======================================================================
         #Update patient appointment status: Queued for 1st dose -> Scheduled for first dose
@@ -224,5 +230,3 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + sqlUpdatePatientStatus)
 
         #======================================================================
-
-

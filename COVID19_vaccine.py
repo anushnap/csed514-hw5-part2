@@ -10,6 +10,9 @@ class COVID19Vaccine:
                  days_between_doses,
                  doses_per_patient,
                  cursor):
+        self.vaccine_name = vaccine_name
+        self.days_between_doses = days_between_doses
+        
         # Determine number of doses needed for each vaccine
         self.sqltext = "INSERT INTO Vaccines ("
         self.sqltext += "VaccineName, VaccineSupplier, AvailableDoses, "
