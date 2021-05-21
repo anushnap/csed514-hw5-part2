@@ -132,7 +132,7 @@ class VaccineReservationScheduler:
             return -2
 
         self.slotSchedulingId = caregiver_slotid
-        # self.appointment_id = appointment_id
+        self.appointment_id = appointment_id
 
         # Update the CaregiverSchedule table from Hold to Scheduled
         self.updateCaregiverSql = "UPDATE CaregiverSchedule "
