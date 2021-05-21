@@ -192,27 +192,45 @@ if __name__ == '__main__':
                 # Add a vaccine and Add doses to inventory of the vaccine
                 vaccines_list = []
                 vaccines_list.append(covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor))
-                vaccines_list.append(covid('Pfizer', 'Pfizer-BioNTech', 0, 0, 21, 2, dbcursor))
-                vaccines_list.append(covid('J&J', 'Johnson & Johnson/Janssen', 0, 0, 0, 1, dbcursor))
+                # vaccines_list.append(covid('Pfizer', 'Pfizer-BioNTech', 0, 0, 21, 2, dbcursor))
+                # vaccines_list.append(covid('J&J', 'Johnson & Johnson/Janssen', 0, 0, 0, 1, dbcursor))
                 covid.add_doses('Moderna', 2, dbcursor)
-                covid.add_doses('Pfizer', 2, dbcursor)
-                covid.add_doses('J&J', 50, dbcursor)
+                # covid.add_doses('Pfizer', 2, dbcursor)
+                # covid.add_doses('J&J', 50, dbcursor)
 
                 # Add patients
-                # patientList = []
-                # patientList.append(patient('Spongebob Squarepants', 0, dbcursor))
-                # patientList.append(patient('Sandy Cheeks', 0, dbcursor))
-                # patientList.append(patient('Squidward', 0, dbcursor))
-                # patientList.append(patient('Patrick Star', 0, dbcursor))
-                # patientList.append(patient('Mr. Krabs', 0, dbcursor))
-                # patients = {}
-                # for pt in patientList:
-                #     ptid = pt.patientId
-                #     patients[ptid] = pt
+                patientList = []
+                patientList.append(patient('Spongebob Squarepants', 0, dbcursor))
+                patientList.append(patient('Sandy Cheeks', 0, dbcursor))
+                patientList.append(patient('Squidward', 0, dbcursor))
+                patientList.append(patient('Patrick Star', 0, dbcursor))
+                patientList.append(patient('Mr. Krabs', 0, dbcursor))
+                patients = {}
+                for pt in patientList:
+                    ptid = pt.patientId
+                    patients[ptid] = pt
 
             with sqlClient.cursor(as_dict = True) as dbcursor:
             # Schedule the patients
-                pass
+                for p in patientList:
+                    try:
+                        # PutHoldOn
+
+                        # Reserve appointment
+
+                        # Check supply
+
+                        # Schedule appointment
+
+                        # commit
+                        cursor.connection.commit()
+                    except Exception as e:
+                        err_str = "Oops! An exception occurred. The transaction for patient "
+                        err_str += str(p.patientId) + ": " + str(p.patientName) + " "
+                        err_str += "was rolled back."
+                        print(err_str)
+                        print(e)
+                        cursor.connection.rollback()
 
             # Test cases done!
             clear_tables(sqlClient)

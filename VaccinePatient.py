@@ -13,6 +13,7 @@ class VaccinePatient:
         self.sqltext += str(vaccine_status) + ")"
 
         self.patientId = 0
+        self.patientName = patient_name
 
         try: 
             cursor.execute(self.sqltext)
