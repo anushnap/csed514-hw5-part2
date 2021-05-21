@@ -76,5 +76,73 @@ class TestVaccinePatient(unittest.TestCase):
             
             clear_tables(sqlClient)
 
+    def test_schedule_appointment(self):
+        '''
+        schedule_appointment maintains vaccine inventory, update slot status in 
+        caregiverschedule and appointments table, update patient appointment status
+        '''
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            clear_tables(sqlClient)
+            with sqlClient.cursor(as_dict=True) as cursor:
+                # initalize objects
+                vp = patient('Anushna Prakash', 1 , cursor)
+                vc = caregiver('Carrie Nation', cursor)
+                vaccine = covid('Pfizer', 'Pfizer-BioNTech', 10, 10, 21, 2, cursor)
+
+                #Insert caregiver slot in caregiver schedule table
+                cg_slot_insert_sql = "INSERT INTO CareGiverSchedule("
+                cg_slot_insert_sql += "CaregiverId, WorkDay, SlotTime, SlotHour, SlotMinute, SlotStatus, "
+                cg_slot_insert_sql += "VaccineAppointmentId) VALUES (1, NULL, NULL, 10, 15, 1, 1)"
+                cursor.execute(cg_slot_insert_sql)
+                cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
+
+                #Insert appointment in appointments table
+                vacc_appt_insert_sql = "INSERT INTO VaccineAppointments("
+                vacc_appt_insert_sql += "VaccineName, PatientId, CaregiverId, ReservationDate, "
+                vacc_appt_insert_sql += "ReservationStartHour, ReservationStartMinute, AppointmentDuration, "            
+                vacc_appt_insert_sql += "SlotStatus, DateAdministered, DoseNumber) VALUES "
+                vacc_appt_insert_sql += "('Pfizer', 1, 1, NULL, 10, 15, 15, 1, NULL, 1)"
+                cursor.execute(vacc_appt_insert_sql)
+                cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
+
+                #Schedule the appointment
+                vp.ScheduleAppointment(1, 1, vaccine, cursor)
+
+                #check VaccineAppointments has exactly 1 rows
+                check_appointments_sql = "SELECT * FROM VaccineAppointments"
+                cursor.execute(check_appointments_sql)
+                rows = cursor.fetchall()
+                self.assertTrue(len(rows) == 1)
+
+                #check vaccines inventory updated
+                check_inventory_sql = "SELECT * FROM Vaccines"
+                cursor.execute(check_inventory_sql)
+                row = cursor.fetchone()
+                self.assertTrue(row['AvailableDoses'] == 8)
+                self.assertTrue(row['ReservedDoses'] == 12)
+
+                #check slot statuses in vaccine appointments and caregiver schedule updated
+                check_slot_stat_sql = "SELECT * FROM VaccineAppointments"
+                cursor.execute(check_slot_stat_sql)
+                row = cursor.fetchone()
+                self.assertTrue(row['SlotStatus'] == 2)
+
+                check_slot_stat2_sql = "SELECT * FROM CaregiverSchedule"
+                cursor.execute(check_slot_stat2_sql)
+                row = cursor.fetchone()
+                self.assertTrue(row['SlotStatus'] == 2)
+
+                #check patient vaccine status updated
+                check_patient_sql = "SELECT * FROM Patients"
+                cursor.execute(check_patient_sql)
+                row = cursor.fetchone()
+                self.assertTrue(row['VaccineStatus'] == 2)
+
+            clear_tables(sqlClient)
+
+
 if __name__ == '__main__':
     unittest.main()

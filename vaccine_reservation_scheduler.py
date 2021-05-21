@@ -158,6 +158,7 @@ class VaccineReservationScheduler:
 
         try:
             cursor.execute(self.updateAppointmentSql)
+            print("Slot statuses updated from hold to scheduled.")
         
         except pymssql.Error as db_err:    
             print("Database Programming Error in SQL Query processing! ")
