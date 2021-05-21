@@ -4,13 +4,10 @@ from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccSch
 from datetime import datetime
 
 class VaccinePatient:
-	'''Adds patient to Database'''
-	def __init__(self,
-                 patient_name,
-                 vaccine_status,
-                 cursor):
+    '''Adds patient to Database'''
+    def __init__(self, patient_name, vaccine_status, cursor):
 
-		self.sqltext = "INSERT INTO Patients ("
+        self.sqltext = "INSERT INTO Patients ("
         self.sqltext += "PatientName, VaccineStatus) VALUES ("
         self.sqltext += "'" + patient_name + "', "
         self.sqltext += str(vaccine_status) + ")"
@@ -33,9 +30,9 @@ class VaccinePatient:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + self.sqltext)
 
-    def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor): 
-    	'''create an entry in the VaccineAppointments Table,  flag patient as "Queued for first dose", 
-            create 2nd entry in VaccineAppointments Table'''
+    def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor):
+        '''create an entry in the VaccineAppointments Table,  flag patient as "Queued for first dose", 
+        create 2nd entry in VaccineAppointments Table'''
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "
@@ -56,7 +53,6 @@ class VaccinePatient:
 
             #print("Query executed successfully.")
         except pymssql.Error as db_err:
-            except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Selecting Caregiver Slot")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
@@ -133,7 +129,6 @@ class VaccinePatient:
 
             #print("Query executed successfully.")
         except pymssql.Error as db_err:
-            except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Selecting Caregiver Slot 2")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
@@ -176,16 +171,4 @@ class VaccinePatient:
 
 
     def ScheduleAppointment(self, VaccineAppointmentID, cursor):
-
-
-
-
-
-
-
-
-
-
-
-
-
+        pass
