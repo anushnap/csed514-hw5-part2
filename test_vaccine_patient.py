@@ -101,13 +101,14 @@ class TestVaccinePatient(unittest.TestCase):
                 cursor.execute(vacc_appt_insert_sql)
 
                 #Schedule the appointment
-                vp.ScheduleAppointment(1, 1, vaccine, cursor)
+                vp.ScheduleAppointment(1, 0, vaccine, cursor)
 
                 #check VaccineAppointments has exactly 1 rows
                 check_appointments_sql = "SELECT * FROM VaccineAppointments"
                 cursor.execute(check_appointments_sql)
                 rows = cursor.fetchall()
                 self.assertTrue(len(rows) == 1)
+                self.assertTrue(rows[0]['SlotStatus'] == 2)
 
                 #check vaccines inventory updated
                 check_inventory_sql = "SELECT * FROM Vaccines"
@@ -116,13 +117,9 @@ class TestVaccinePatient(unittest.TestCase):
                 self.assertTrue(row['AvailableDoses'] == 8)
                 self.assertTrue(row['ReservedDoses'] == 12)
 
-                #check slot statuses in vaccine appointments and caregiver schedule updated
-                check_slot_stat_sql = "SELECT * FROM VaccineAppointments"
-                cursor.execute(check_slot_stat_sql)
-                row = cursor.fetchone()
-                self.assertTrue(row['SlotStatus'] == 2)
-
-                check_slot_stat2_sql = "SELECT * FROM CaregiverSchedule"
+                #check slot statuses in caregiver schedule updated
+                check_slot_stat2_sql = "SELECT * FROM CaregiverSchedule "
+                check_slot_stat2_sql += "WHERE CaregiverSlotSchedulingId = 1"
                 cursor.execute(check_slot_stat2_sql)
                 row = cursor.fetchone()
                 self.assertTrue(row['SlotStatus'] == 2)
