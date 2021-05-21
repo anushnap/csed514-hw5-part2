@@ -92,13 +92,6 @@ class TestVaccinePatient(unittest.TestCase):
                 vc = caregiver('Carrie Nation', cursor)
                 vaccine = covid('Pfizer', 'Pfizer-BioNTech', 10, 10, 21, 2, cursor)
 
-                #Insert caregiver slot in caregiver schedule table
-                cg_slot_insert_sql = "INSERT INTO CareGiverSchedule("
-                cg_slot_insert_sql += "CaregiverId, WorkDay, SlotTime, SlotHour, SlotMinute, SlotStatus, "
-                cg_slot_insert_sql += "VaccineAppointmentId) VALUES (1, NULL, NULL, 10, 15, 1, 1)"
-                cursor.execute(cg_slot_insert_sql)
-                cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
-
                 #Insert appointment in appointments table
                 vacc_appt_insert_sql = "INSERT INTO VaccineAppointments("
                 vacc_appt_insert_sql += "VaccineName, PatientId, CaregiverId, ReservationDate, "
@@ -106,7 +99,6 @@ class TestVaccinePatient(unittest.TestCase):
                 vacc_appt_insert_sql += "SlotStatus, DateAdministered, DoseNumber) VALUES "
                 vacc_appt_insert_sql += "('Pfizer', 1, 1, NULL, 10, 15, 15, 1, NULL, 1)"
                 cursor.execute(vacc_appt_insert_sql)
-                cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
 
                 #Schedule the appointment
                 vp.ScheduleAppointment(1, 1, vaccine, cursor)
