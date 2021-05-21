@@ -10,7 +10,7 @@ from vaccine_caregiver import VaccineCaregiver
 from enums import *
 from utils import *
 from COVID19_vaccine import COVID19Vaccine as covid
-from vaccine_patient import VaccinePatient as patient
+# from VaccinePatient import VaccinePatient as patient
 
 
 class VaccineReservationScheduler:
@@ -118,7 +118,7 @@ class VaccineReservationScheduler:
 
     def ScheduleAppointmentSlot(self, 
                                 caregiver_slotid,
-                                # appointment_id,
+                                appointment_id,
                                 cursor):
         '''Marks a slot on Hold with a definite reservation in CaregiverSchedule and VaccineAppointments.  
         slotid is the caregiver slot id that is currently on Hold and whose status will be updated 
@@ -152,20 +152,20 @@ class VaccineReservationScheduler:
             return -1
         
         # Update VaccineAppointments table from Hold to Scheduled
-        # self.updateAppointmentSql = "UPDATE VaccineAppointments "
-        # self.updateAppointmentSql += "SET SlotStatus = 2 "
-        # self.updateAppointmentSql += "WHERE VaccineAppointmentId = " + str(appointment_id)
+        self.updateAppointmentSql = "UPDATE VaccineAppointments "
+        self.updateAppointmentSql += "SET SlotStatus = 2 "
+        self.updateAppointmentSql += "WHERE VaccineAppointmentId = " + str(appointment_id)
 
-        # try:
-        #     cursor.execute(self.updateAppointmentSql)
+        try:
+            cursor.execute(self.updateAppointmentSql)
         
-        # except pymssql.Error as db_err:    
-        #     print("Database Programming Error in SQL Query processing! ")
-        #     print("Exception code: " + db_err.args[0])
-        #     if len(db_err.args) > 1:
-        #         print("Exception message: " + str(db_err.args[1]))  
-        #     print("SQL text that resulted in an Error: " + self.updateAppointmentSql)
-        #     return -1
+        except pymssql.Error as db_err:    
+            print("Database Programming Error in SQL Query processing! ")
+            print("Exception code: " + db_err.args[0])
+            if len(db_err.args) > 1:
+                print("Exception message: " + str(db_err.args[1]))  
+            print("SQL text that resulted in an Error: " + self.updateAppointmentSql)
+            return -1
         
         return self.slotSchedulingId
 
@@ -198,16 +198,16 @@ if __name__ == '__main__':
                 covid.add_doses('J&J', 50, dbcursor)
 
                 # Add patients
-                patientList = []
-                patientList.append(patient('Spongebob Squarepants', 0, dbcursor))
-                patientList.append(patient('Sandy Cheeks', 0, dbcursor))
-                patientList.append(patient('Squidward', 0, dbcursor))
-                patientList.append(patient('Patrick Star', 0, dbcursor))
-                patientList.append(patient('Mr. Krabs', 0, dbcursor))
-                patients = {}
-                for pt in patientList:
-                    ptid = pt.patientId
-                    patients[ptid] = pt
+                # patientList = []
+                # patientList.append(patient('Spongebob Squarepants', 0, dbcursor))
+                # patientList.append(patient('Sandy Cheeks', 0, dbcursor))
+                # patientList.append(patient('Squidward', 0, dbcursor))
+                # patientList.append(patient('Patrick Star', 0, dbcursor))
+                # patientList.append(patient('Mr. Krabs', 0, dbcursor))
+                # patients = {}
+                # for pt in patientList:
+                #     ptid = pt.patientId
+                #     patients[ptid] = pt
 
             with sqlClient.cursor(as_dict = True) as dbcursor:
             # Schedule the patients

@@ -6,6 +6,7 @@ from enums import *
 from utils import *
 from vaccine_reservation_scheduler import VaccineReservationScheduler as scheduler
 from vaccine_caregiver import VaccineCaregiver
+from COVID19_vaccine import COVID19Vaccine as covid
 
 class TestReservationScheduler(unittest.TestCase):
 
@@ -99,8 +100,8 @@ class TestReservationScheduler(unittest.TestCase):
                                   Password=os.getenv("Password")) as sqlClient:
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
-                self.assertEqual(scheduler().ScheduleAppointmentSlot(-1, cursor), -2)
-                self.assertEqual(scheduler().ScheduleAppointmentSlot("Not a valid id", cursor), -2)
+                self.assertEqual(scheduler().ScheduleAppointmentSlot(-1, 1, cursor), -2)
+                self.assertEqual(scheduler().ScheduleAppointmentSlot("Not a valid id", 1, cursor), -2)
                 get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 2"
                 cursor.execute(get_schedule_sql)
                 rows = cursor.fetchall()
@@ -116,13 +117,34 @@ class TestReservationScheduler(unittest.TestCase):
                                   Password=os.getenv("Password")) as sqlClient:
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
-                self.assertEqual(scheduler().ScheduleAppointmentSlot(1, cursor), 1)
+                vaccine = covid('Moderna', 'Moderna', 10, 10, 28, 2, cursor)
+                
+                sqlCreatePatient = "INSERT INTO Patients (PatientName, VaccineStatus) VALUES ("
+                sqlCreatePatient += "'Patrick Render', 0)"
+                cursor.execute(sqlCreatePatient)
 
+                sqlCreateAppt = "INSERT INTO VaccineAppointments ("
+                sqlCreateAppt += "VaccineName, PatientId, CaregiverId, SlotStatus) VALUES ("
+                sqlCreateAppt += "'Moderna', "
+                sqlCreateAppt += "1, "
+                sqlCreateAppt += str(vc.caregiverId) + ", "
+                sqlCreateAppt += "1)"
+                cursor.execute(sqlCreateAppt)
+
+                self.assertEqual(scheduler().ScheduleAppointmentSlot(1, 1, cursor), 1)
+
+                # Caregiverschedule is updated once
                 get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 2"
                 cursor.execute(get_schedule_sql)
                 rows = cursor.fetchall()
                 self.assertTrue(len(rows) == 1)
-            
+
+                # VaccineAppointments table is updated once
+                get_appointments_sql = "SELECT * FROM VaccineAppointments WHERE SlotStatus = 2"
+                cursor.execute(get_appointments_sql)
+                rows = cursor.fetchall()
+                self.assertTrue(len(rows) == 1)
+
             clear_tables(sqlClient)
 
 if __name__ == "__main__":
