@@ -19,7 +19,7 @@
             - Update vaccineappointment slot status from hold to scheduled
         - Update patient appointment status from queued to scheduled
     - If any step above fails, throw exception & rollback
-        - caregiver_slodid that is invalid (negative number)
+        - caregiver_slotid that is invalid (negative number)
         - not enough vaccines in stock
 6. Schedule 2nd dose
     - Select a patient (from some queue?)

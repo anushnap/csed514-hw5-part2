@@ -1,6 +1,6 @@
 import pymssql 
 from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccScheduler
-#from COVID19_vaccine.py import COVID19Vaccine as covidVacc
+from COVID19_vaccine.py import COVID19Vaccine as CovidVaccine
 from datetime import datetime
 
 class VaccinePatient:
@@ -200,10 +200,20 @@ class VaccinePatient:
         '''update the Patient’s VaccineStatus from "Queued for first dose" to 1st Dose Scheduled
             maintain the Vaccine inventory'''
 
-        #maintain vaccine inventory
+        #======================================================================
+        #Maintain vaccine inventory
 
-        #check that Slot statuses are on hold
+        #Reserve 2 doses
+        CovidVaccine.reserve_doses(getattr(Vaccine,'vaccine_name'))
 
+        #======================================================================
+        #Update caregiver slot status from hold to scheduled
+        #Update vaccineappointment slot status from hold to scheduled
+
+        sqlUpdateSlotStatuses = VaccScheduler.ScheduleAppointmentSlot(CaregiverSlotID, VaccineAppointmentID)
+
+        # if (sqlUpdatePatientStatus < 0):
+        #     print("Slot statuses not updated")
 
         #======================================================================
         #Update patient appointment status: Queued for 1st dose -> Scheduled for first dose
