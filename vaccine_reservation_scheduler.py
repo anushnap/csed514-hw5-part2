@@ -190,10 +190,11 @@ if __name__ == '__main__':
                     caregivers[cgid] = cg
 
                 # Add a vaccine and Add doses to inventory of the vaccine
-                vaccines_list = []
-                vaccines_list.append(covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor))
+                # vaccines_list = []
+                # vaccines_list.append(covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor))
                 # vaccines_list.append(covid('Pfizer', 'Pfizer-BioNTech', 0, 0, 21, 2, dbcursor))
                 # vaccines_list.append(covid('J&J', 'Johnson & Johnson/Janssen', 0, 0, 0, 1, dbcursor))
+                vaccine = covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor)
                 covid.add_doses('Moderna', 2, dbcursor)
                 # covid.add_doses('Pfizer', 2, dbcursor)
                 # covid.add_doses('J&J', 50, dbcursor)
@@ -215,9 +216,9 @@ if __name__ == '__main__':
                 for p in patientList:
                     try:
                         # PutHoldOn
-
+                        cg_first_slot = PutHoldOnAppointment1(dbcursor)
                         # Reserve appointment
-
+                        p.ReserveAppointment(cg_first_slot, vaccine, dbcursor)
                         # Check supply
 
                         # Schedule appointment
