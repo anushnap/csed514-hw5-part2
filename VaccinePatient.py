@@ -1,6 +1,6 @@
 import pymssql 
 from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccScheduler
-from COVID19_vaccine.py import COVID19Vaccine as CovidVaccine
+from COVID19_vaccine import COVID19Vaccine as CovidVaccine
 from datetime import datetime
 
 class VaccinePatient:
