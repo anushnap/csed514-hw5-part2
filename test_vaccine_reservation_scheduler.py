@@ -38,7 +38,7 @@ class TestReservationScheduler(unittest.TestCase):
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
                                   Password=os.getenv("Password")) as sqlClient:
-
+            clear_tables(sqlClient)
             # get a cursor from the SQL connection
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
@@ -58,7 +58,7 @@ class TestReservationScheduler(unittest.TestCase):
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
                                   Password=os.getenv("Password")) as sqlClient:
-
+            clear_tables(sqlClient)
             # get a cursor from the SQL connection
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
@@ -78,7 +78,7 @@ class TestReservationScheduler(unittest.TestCase):
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
                                   Password=os.getenv("Password")) as sqlClient:
-
+            clear_tables(sqlClient)
             # get a cursor from the SQL connection
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
@@ -98,6 +98,8 @@ class TestReservationScheduler(unittest.TestCase):
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
                                   Password=os.getenv("Password")) as sqlClient:
+            clear_tables(sqlClient)
+            
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
                 self.assertEqual(scheduler().ScheduleAppointmentSlot(-1, 1, cursor), -2)
@@ -115,6 +117,8 @@ class TestReservationScheduler(unittest.TestCase):
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
                                   Password=os.getenv("Password")) as sqlClient:
+            clear_tables(sqlClient)
+            
             with sqlClient.cursor(as_dict=True) as cursor:
                 vc = VaccineCaregiver('Carrie Nation', cursor)
                 vaccine = covid('Moderna', 'Moderna', 10, 10, 28, 2, cursor)
@@ -131,7 +135,7 @@ class TestReservationScheduler(unittest.TestCase):
                 sqlCreateAppt += "1)"
                 cursor.execute(sqlCreateAppt)
 
-                self.assertEqual(scheduler().ScheduleAppointmentSlot(1, 1, cursor), 1)
+                self.assertEqual(scheduler().ScheduleAppointmentSlot(1, 0, cursor), 1)
 
                 # Caregiverschedule is updated once
                 get_schedule_sql = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 2"
