@@ -34,11 +34,8 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + self.sqltext)
 
     def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor): 
-    	'''Validate caregiver slot ID and put on "Hold" status and create an entry 
-    	in the VaccineAppointment Table flagged as "Queued for first dose"'''
-
-    	#Select first available CaregiverSlotID that is on hold
-    	openSlotCheck = VaccScheduler.PutHoldOnAppointment1(CaregiverSchedulingID, cursor)
+    	'''create an entry in the VaccineAppointments Table,  flag patient as "Queued for first dose", 
+            create 2nd entry in VaccineAppointments Table'''
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "
@@ -56,7 +53,6 @@ class VaccinePatient:
             SlotStatus = row['SlotStatus']
             DateAdministered = NULL #needs to be changed when vaccine is administered 
             DoseNumber = 1
-            VaccineAppointmentId = row['VaccineAppointmentId']
 
             #print("Query executed successfully.")
         except pymssql.Error as db_err:
@@ -73,14 +69,13 @@ class VaccinePatient:
             #need patientID/name as parameter
 
         #Insert first appointment to VaccineAppointments table
-        sqlCreateAppt = "INSERT INTO VaccineAppointments (VaccineAppointmentId, "
+        sqlCreateAppt = "INSERT INTO VaccineAppointments ("
         sqlCreateAppt += "VaccineName, PatientId, CaregiverId, ReservationDate, ReservationStartHour, "
         sqlCreateAppt += "ReservationStartMinute, AppointmentDuration, SlotStatus, DateAdministered, "
         sqlCreateAppt += "DoseNumber) VALUES ("
-        sqlCreateAppt += VaccineAppointmentId + ", "
         sqlCreateAppt += getattr(Vaccine,'vaccine_name') + ", "
-        sqlCreateAppt += self.patientId + ", "
-        sqlCreateAppt += CaregiverId  + ", "
+        sqlCreateAppt += str(self.patientId) + ", "
+        sqlCreateAppt += str(CaregiverId)  + ", "
         sqlCreateAppt += str(ReservationDate) + ", "
         sqlCreateAppt += str(ReservationStartHour) + ", "
         sqlCreateAppt += str(ReservationStartMinute) + ", "
@@ -89,16 +84,16 @@ class VaccinePatient:
         sqlCreateAppt += str(DateAdministered) + ", "
         sqlCreateAppt += str(DoseNumber) + ")"
 
-        #appointmentId = 0 #primary key
+        appointmentId = 0 #primary key
 
         try:
             cursor.execute(sqlCreateAppt)
             #cursor.connection.commit()
-            # cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
-            # _identityRow = cursor.fetchone()
-            # appointmentId = _identityRow['Identity']
+            cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
+            _identityRow = cursor.fetchone()
+            appointmentId = _identityRow['Identity']
             print('Query executed successfully. Appointment added to the database using AppointmentID = ' 
-                + str(VaccineAppointmentId))
+                + str(appointmentId))
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Appointments! ")
             print("Exception code: " + str(db_err.args[0]))
@@ -111,13 +106,13 @@ class VaccinePatient:
 
         sqlUpdatePatientStatus = "UPDATE Patients SET VaccineStatus = 1 "
         sqlUpdatePatientStatus += "WHERE PatientId = "
-        sqlUpdatePatientStatus += self.patientId 
+        sqlUpdatePatientStatus += str(self.patientId)
 
         #======================================================================
 		#Create a second appointment 3-6 weeks after the 1st appointment
 
         #Check for first available slot in 3-6 weeks time
-        openSlotCheck2 = VaccScheduler.PutHoldOnAppointment2(CaregiverSchedulingID, 21)
+        openSlotCheck2 = VaccScheduler.PutHoldOnAppointment2(CaregiverSchedulingID, getattr(Vaccine,'days_between_doses'))
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot2 = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "
@@ -135,7 +130,6 @@ class VaccinePatient:
             SlotStatus = row['SlotStatus']
             DateAdministered = NULL #needs to be changed when vaccine is administered 
             DoseNumber = 1
-            VaccineAppointmentId = row['VaccineAppointmentId']
 
             #print("Query executed successfully.")
         except pymssql.Error as db_err:
@@ -152,10 +146,9 @@ class VaccinePatient:
         sqlCreateAppt2 += "VaccineName, PatientId, CaregiverId, ReservationDate, ReservationStartHour, "
         sqlCreateAppt2 += "ReservationStartMinute, AppointmentDuration, SlotStatus, DateAdministered, "
         sqlCreateAppt2 += "DoseNumber) VALUES ("
-        sqlCreateAppt2 += VaccineAppointmentId + ", "
         sqlCreateAppt2 += getattr(Vaccine,'vaccine_name') + ", "
-        sqlCreateAppt2 += self.patientId + ", "
-        sqlCreateAppt2 += CaregiverId  + ", "
+        sqlCreateAppt2 += str(self.patientId) + ", "
+        sqlCreateAppt2 += str(CaregiverId) + ", "
         sqlCreateAppt2 += str(ReservationDate) + ", "
         sqlCreateAppt2 += str(ReservationStartHour) + ", "
         sqlCreateAppt2 += str(ReservationStartMinute) + ", "
@@ -163,16 +156,17 @@ class VaccinePatient:
         sqlCreateAppt2 += str(SlotStatus) + ", "
         sqlCreateAppt2 += str(DateAdministered) + ", "
         sqlCreateAppt2 += str(DoseNumber) + ")"
-        #appointmentId2 = 0 #primary key
+        
+        appointmentId2 = 0 #primary key
 
         try:
             cursor.execute(sqlCreateAppt2)
             #cursor.connection.commit()
-            # cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
-            # _identityRow = cursor.fetchone()
-            # appointmentId = _identityRow['Identity']
+            cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
+            _identityRow = cursor.fetchone()
+            appointmentId2 = _identityRow['Identity']
             print('Query executed successfully. Appointment added to the database using AppointmentID = ' 
-                + str(VaccineAppointmentId))
+                + str(appointmentId2))
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Appointments! ")
             print("Exception code: " + str(db_err.args[0]))
@@ -182,4 +176,16 @@ class VaccinePatient:
 
 
     def ScheduleAppointment(self, VaccineAppointmentID, cursor):
+
+
+
+
+
+
+
+
+
+
+
+
 
