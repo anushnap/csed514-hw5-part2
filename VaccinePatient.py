@@ -48,7 +48,7 @@ class VaccinePatient:
             ReservationStartMinute = row['SlotMinute']
             AppointmentDuration = 15
             SlotStatus = row['SlotStatus']
-            DateAdministered = NULL #needs to be changed when vaccine is administered 
+            DateAdministered = NULL 
             DoseNumber = 1
 
             #print("Query executed successfully.")
@@ -61,8 +61,6 @@ class VaccinePatient:
 
         #======================================================================
 		#Create an entry in the VaccineAppointmentsTable 
-            #Q: how to get patient ID that corresponds to this appointment?
-            #need patientID/name as parameter
 
         #Insert first appointment to VaccineAppointments table
         sqlCreateAppt = "INSERT INTO VaccineAppointments ("
@@ -98,11 +96,40 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + sqlCreateAppt)
 
         #======================================================================
+        #update caregiver schedule and set vaccine appiontment id from 0 -> unique value
+
+        sqlUpdateAppointmentID = "UPDATE CaregiverSchedule SET VaccineAppointmentId = "
+        sqlUpdateAppointmentID += str(appointmentId)
+        sqlUpdateAppointmentID += "WHERE CaregiverSlotSchedulingId = "
+        sqlUpdateAppointmentID += str(CaregiverSchedulingID)
+
+        try:
+            cursor.execute(sqlUpdateAppointmentID)
+
+        except pymssql.Error as db_err:    
+            print("Database Programming Error in SQL Query processing! ")
+            print("Exception code: " + db_err.args[0])
+            if len(db_err.args) > 1:
+                print("Exception message: " + str(db_err.args[1]))  
+            print("SQL text that resulted in an Error: " + sqlUpdateAppointmentID)
+
+        #======================================================================
 		#Update patient appointment status: New -> Queued for first dose
 
         sqlUpdatePatientStatus = "UPDATE Patients SET VaccineStatus = 1 "
         sqlUpdatePatientStatus += "WHERE PatientId = "
         sqlUpdatePatientStatus += str(self.patientId)
+
+        try:
+            cursor.execute(sqlUpdatePatientStatus)
+            print('Query executed successfully. Patient status updated using patientID = ' 
+                + str(self.patientId))
+        except pymssql.Error as db_err:
+            print("Database Programming Error in SQL Query processing for Patients! ")
+            print("Exception code: " + str(db_err.args[0]))
+            if len(db_err.args) > 1:
+                print("Exception message: " + db_err.args[1])
+            print("SQL text that resulted in an Error: " + sqlUpdatePatientStatus)
 
         #======================================================================
 		#Create a second appointment 3-6 weeks after the 1st appointment
@@ -124,10 +151,9 @@ class VaccinePatient:
             ReservationStartMinute = row['SlotMinute']
             AppointmentDuration = 15
             SlotStatus = row['SlotStatus']
-            DateAdministered = NULL #needs to be changed when vaccine is administered 
-            DoseNumber = 1
+            DateAdministered = NULL 
+            DoseNumber = 2
 
-            #print("Query executed successfully.")
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Selecting Caregiver Slot 2")
             print("Exception code: " + str(db_err.args[0]))
@@ -135,9 +161,9 @@ class VaccinePatient:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + sqlSelectCaregiverSlot2)
 
-
+        #======================================================================
         #Insert second appointment to VaccineAppointments table
-        sqlCreateAppt2 = "INSERT INTO VaccineAppointments (VaccineAppointmentId, "
+        sqlCreateAppt2 = "INSERT INTO VaccineAppointments ("
         sqlCreateAppt2 += "VaccineName, PatientId, CaregiverId, ReservationDate, ReservationStartHour, "
         sqlCreateAppt2 += "ReservationStartMinute, AppointmentDuration, SlotStatus, DateAdministered, "
         sqlCreateAppt2 += "DoseNumber) VALUES ("
@@ -170,5 +196,33 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + sqlCreateAppt2)
 
 
-    def ScheduleAppointment(self, VaccineAppointmentID, cursor):
-        pass
+    def ScheduleAppointment(self, CaregiverSlotID, VaccineAppointmentID, Vaccine, cursor):
+        '''update the Patient’s VaccineStatus from "Queued for first dose" to 1st Dose Scheduled
+            maintain the Vaccine inventory'''
+
+        #maintain vaccine inventory
+
+        #check that Slot statuses are on hold
+
+
+        #======================================================================
+        #Update patient appointment status: Queued for 1st dose -> Scheduled for first dose
+
+        sqlUpdatePatientStatus = "UPDATE Patients SET VaccineStatus = 2 "
+        sqlUpdatePatientStatus += "WHERE PatientId = "
+        sqlUpdatePatientStatus += str(self.patientId)
+
+        try:
+            cursor.execute(sqlUpdatePatientStatus)
+            print('Query executed successfully. Patient status updated using patientID = ' 
+                + str(self.patientId))
+        except pymssql.Error as db_err:
+            print("Database Programming Error in SQL Query processing for Patients! ")
+            print("Exception code: " + str(db_err.args[0]))
+            if len(db_err.args) > 1:
+                print("Exception message: " + db_err.args[1])
+            print("SQL text that resulted in an Error: " + sqlUpdatePatientStatus)
+
+        #======================================================================
+
+
