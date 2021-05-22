@@ -1,5 +1,7 @@
 import pymssql
 
+class 
+
 class COVID19Vaccine:
     '''Adds the Vaccine to the DB'''
     def __init__(self,
@@ -29,10 +31,6 @@ class COVID19Vaccine:
         try: 
             cursor.execute(self.sqltext)
             cursor.connection.commit()
-            # cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
-            # _identityRow = cursor.fetchone()
-            # self.VaccineId = _identityRow['Identity']
-            # # cursor.connection.commit()
             print('Query executed successfully. Vaccine : ' + vaccine_name +  ' added to the database')
         
         except pymssql.Error as db_err:
