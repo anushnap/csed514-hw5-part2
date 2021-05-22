@@ -1,6 +1,7 @@
 import pymssql
 
-class 
+class InsufficientStock(Exception):
+    pass
 
 class COVID19Vaccine:
     '''Adds the Vaccine to the DB'''
@@ -94,14 +95,14 @@ class COVID19Vaccine:
                 doses_reserved += 2
                 doses_in_stock -= 2
             else:
-                print("WARNING: Not enough vaccines in stock! CANNOT RESERVE")
+                raise InsufficientStock("WARNING: Not enough vaccines in stock! CANNOT RESERVE")
         else:
             #check if there are enough in stock and reserve
             if doses_in_stock >= 1:
                 doses_reserved += 1
                 doses_in_stock -= 1
             else:
-                print("WARNING: Not enough vaccines in stock! CANNOT RESERVE")
+                raise InsufficientStock("WARNING: Not enough vaccines in stock! CANNOT RESERVE")
         
         sqltext2 = "UPDATE VACCINES SET AvailableDoses = "
         sqltext2 += str(doses_in_stock) + ", ReservedDoses = "

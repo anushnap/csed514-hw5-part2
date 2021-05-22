@@ -5,6 +5,7 @@ from sql_connection_manager import SqlConnectionManager
 from enums import *
 from utils import *
 from COVID19_vaccine import COVID19Vaccine as covid
+from COVID19_vaccine import InsufficientStock
 
 class TestCovid19(unittest.TestCase):
     def test_init(self):
@@ -140,6 +141,15 @@ class TestCovid19(unittest.TestCase):
                     # clear the tables if an exception occurred
                     clear_tables(sqlClient)
                     self.fail("reserve_doses method failed")
+    
+    def test_reserve_doses_raises_exception(self):
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                covid('Pfizer', 'Pfizer-BioNTech', 1, 0, 21, 2, cursor)
+                self.assertRaises(InsufficientStock, covid.reserve_doses, 'Pfizer', cursor)
 
     def test_deplete_reserve(self):
         """Test COVID19Vaccine.deplete_reserve reduces reserves by 1"""
