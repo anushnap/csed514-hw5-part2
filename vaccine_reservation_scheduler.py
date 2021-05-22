@@ -10,7 +10,7 @@ from vaccine_caregiver import VaccineCaregiver
 from enums import *
 from utils import *
 from COVID19_vaccine import COVID19Vaccine as covid
-# from VaccinePatient import VaccinePatient as patient
+from VaccinePatient import VaccinePatient as patient
 
 
 class VaccineReservationScheduler:
@@ -195,7 +195,7 @@ if __name__ == '__main__':
                 # vaccines_list.append(covid('Pfizer', 'Pfizer-BioNTech', 0, 0, 21, 2, dbcursor))
                 # vaccines_list.append(covid('J&J', 'Johnson & Johnson/Janssen', 0, 0, 0, 1, dbcursor))
                 vaccine = covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor)
-                covid.add_doses('Moderna', 2, dbcursor)
+                covid.add_doses('Moderna', 5, dbcursor)
                 # covid.add_doses('Pfizer', 2, dbcursor)
                 # covid.add_doses('J&J', 50, dbcursor)
 
@@ -216,22 +216,32 @@ if __name__ == '__main__':
                 for p in patientList:
                     try:
                         # PutHoldOn
-                        cg_first_slot = PutHoldOnAppointment1(dbcursor)
+                        cg_first_slot = vrs.PutHoldOnAppointment1(dbcursor)
                         # Reserve appointment
-                        p.ReserveAppointment(cg_first_slot, vaccine, dbcursor)
-                        # Check supply
-
+                        first_appt = p.ReserveAppointment(cg_first_slot, vaccine, dbcursor)
                         # Schedule appointment
-
+                        p.ScheduleAppointment(cg_first_slot, first_appt, vaccine, dbcursor)
                         # commit
-                        cursor.connection.commit()
+                        dbcursor.connection.commit()
                     except Exception as e:
                         err_str = "Oops! An exception occurred. The transaction for patient "
                         err_str += str(p.patientId) + ": " + str(p.patientName) + " "
                         err_str += "was rolled back."
                         print(err_str)
                         print(e)
-                        cursor.connection.rollback()
+                        dbcursor.connection.rollback()
+                
+                # Debugging print statements
+                check_patients = "SELECT * FROM Patients"
+                check_vaccines = "SELECT * FROM Vaccines"
+                check_cgs = "SELECT * FROM CaregiverSchedule where SlotStatus IN (1, 2)"
+                check_appts = "SELECT * FROM VaccineAppointments"
+                queries = [check_patients, check_vaccines, check_cgs, check_appts]
+
+                for q in queries:
+                    dbcursor.execute(q)
+                    rows = dbcursor.fetchall()
+                    print(rows)
 
             # Test cases done!
-            clear_tables(sqlClient)
+            # clear_tables(sqlClient)
