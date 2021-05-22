@@ -1,6 +1,4 @@
 import pymssql 
-from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccScheduler
-from COVID19_vaccine import COVID19Vaccine as CovidVaccine
 from datetime import datetime
 
 class VaccinePatient:
@@ -21,10 +19,11 @@ class VaccinePatient:
             cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
             _identityRow = cursor.fetchone()
             self.patientId = _identityRow['Identity']
-            # cursor.connection.commit()
+            cursor.connection.commit()
             print('Query executed successfully. Patient : ' + patient_name
             +  ' added to the database using Patient ID = ' + str(self.patientId))
         except pymssql.Error as db_err:
+            cursor.connection.rollback()
             print("Database Programming Error in SQL Query processing for Patients! ")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
@@ -34,6 +33,7 @@ class VaccinePatient:
     def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor):
         '''create an entry in the VaccineAppointments Table,  flag patient as "Queued for first dose", 
         create 2nd entry in VaccineAppointments Table'''
+        from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccScheduler
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "
@@ -191,11 +191,15 @@ class VaccinePatient:
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + sqlCreateAppt2)
+        
+        return appointmentId
 
 
     def ScheduleAppointment(self, CaregiverSlotID, VaccineAppointmentID, Vaccine, cursor):
         '''update the Patient’s VaccineStatus from "Queued for first dose" to 1st Dose Scheduled
             maintain the Vaccine inventory'''
+        from COVID19_vaccine import COVID19Vaccine as CovidVaccine
+        from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccScheduler
 
         #======================================================================
         #Maintain vaccine inventory

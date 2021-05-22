@@ -31,6 +31,7 @@ class TestVaccinePatient(unittest.TestCase):
         '''
         reserve_appointment changes patient status from new to queued
         adds row to VaccineAppointments table with slot status 'hold'
+        returns appointmentid
         '''
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
@@ -47,7 +48,9 @@ class TestVaccinePatient(unittest.TestCase):
                 hold_first_cgslot_sql += "WHERE CaregiverSlotSchedulingId = 1"
                 cursor.execute(hold_first_cgslot_sql)
 
-                vp.ReserveAppointment(1, vaccine, cursor)
+                appt = vp.ReserveAppointment(1, vaccine, cursor)
+                self.assertEqual(appt, 0)
+                
                 # check VaccineAppointments has exactly 2 rows
                 check_appointments_sql = "SELECT * FROM VaccineAppointments"
                 cursor.execute(check_appointments_sql)

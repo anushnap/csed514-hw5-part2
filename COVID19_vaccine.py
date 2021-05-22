@@ -52,7 +52,7 @@ class COVID19Vaccine:
         
         try: 
             cursor.execute(sqltext)
-            cursor.connection.commit()
+            # cursor.connection.commit()
             print("Query executed successfully.")
         
         except pymssql.Error as db_err:
@@ -113,7 +113,7 @@ class COVID19Vaccine:
 
         try: 
             cursor.execute(sqltext2)
-            cursor.connection.commit()
+            # cursor.connection.commit()
             print("Query executed successfully.")
         
         except pymssql.Error as db_err:
@@ -132,7 +132,7 @@ class COVID19Vaccine:
         
         try: 
             cursor.execute(sqltext)
-            cursor.connection.commit()
+            # cursor.connection.commit()
             print("Query executed successfully.")
         
         except pymssql.Error as db_err:
