@@ -8,6 +8,7 @@ from vaccine_reservation_scheduler import VaccineReservationScheduler as schedul
 from vaccine_caregiver import VaccineCaregiver as caregiver
 from COVID19_vaccine import COVID19Vaccine as covid
 from VaccinePatient import VaccinePatient as patient
+from VaccinePatient import InvalidCaregiverSchedulingSlotId
 
 class TestVaccinePatient(unittest.TestCase):
 
@@ -50,7 +51,7 @@ class TestVaccinePatient(unittest.TestCase):
 
                 appt = vp.ReserveAppointment(1, vaccine, cursor)
                 self.assertEqual(appt, 0)
-                
+
                 # check VaccineAppointments has exactly 2 rows
                 check_appointments_sql = "SELECT * FROM VaccineAppointments"
                 cursor.execute(check_appointments_sql)
@@ -78,6 +79,19 @@ class TestVaccinePatient(unittest.TestCase):
                 self.assertTrue(row['VaccineStatus'] == 1)
             
             clear_tables(sqlClient)
+
+    def test_reserve_appointment_raises_Exception(self):
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            clear_tables(sqlClient)
+            with sqlClient.cursor(as_dict=True) as cursor:
+                # initalize objects
+                vp = patient('Dwight Sablan', 0 , cursor)
+                vaccine = covid('Pfizer', 'Pfizer-BioNTech', 10, 10, 21, 2, cursor)
+                self.assertRaises(InvalidCaregiverSchedulingSlotId, vp.ReserveAppointment, -1, vaccine, cursor)
+                self.assertRaises(InvalidCaregiverSchedulingSlotId, vp.ReserveAppointment, -2, vaccine, cursor)
 
     def test_schedule_appointment(self):
         '''

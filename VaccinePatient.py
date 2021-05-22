@@ -1,5 +1,7 @@
 import pymssql 
-from datetime import datetime
+
+class InvalidCaregiverSchedulingSlotId(Exception):
+    pass
 
 class VaccinePatient:
     '''Adds patient to Database'''
@@ -34,6 +36,9 @@ class VaccinePatient:
         '''create an entry in the VaccineAppointments Table,  flag patient as "Queued for first dose", 
         create 2nd entry in VaccineAppointments Table'''
         from vaccine_reservation_scheduler import VaccineReservationScheduler as VaccScheduler
+
+        if CaregiverSchedulingID < 0:
+            raise InvalidCaregiverSchedulingSlotId("The CaregiverSlotSchedulingId passed is invalid : " + str(CaregiverSchedulingID))
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "
@@ -135,6 +140,8 @@ class VaccinePatient:
 
         #Check for first available slot in 3-6 weeks time
         openSlotCheck2 = VaccScheduler().PutHoldOnAppointment2(CaregiverSchedulingID, getattr(Vaccine,'days_between_doses'), cursor)
+        if openSlotCheck2 < 0:
+            raise InvalidCaregiverSchedulingSlotId("Error holding second appointment")
 
         #Select * for corresponding CaregiverSlotID in caregivers table
         sqlSelectCaregiverSlot2 = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = "

@@ -232,16 +232,17 @@ if __name__ == '__main__':
                         dbcursor.connection.rollback()
                 
                 # Debugging print statements
-                check_patients = "SELECT * FROM Patients"
-                check_vaccines = "SELECT * FROM Vaccines"
-                check_cgs = "SELECT * FROM CaregiverSchedule where SlotStatus IN (1, 2)"
-                check_appts = "SELECT * FROM VaccineAppointments"
-                queries = [check_patients, check_vaccines, check_cgs, check_appts]
+                # check_patients = "SELECT * FROM Patients"
+                # check_vaccines = "SELECT * FROM Vaccines"
+                # check_cgs = "SELECT CaregiverSlotSchedulingId, CaregiverId, WorkDay, SlotStatus, VaccineAppointmentId "
+                # check_cgs += "FROM CaregiverSchedule where SlotStatus IN (1, 2)"
+                # check_appts = "SELECT * FROM VaccineAppointments"
+                # queries = [check_patients, check_vaccines, check_cgs, check_appts]
 
-                for q in queries:
-                    dbcursor.execute(q)
-                    rows = dbcursor.fetchall()
-                    print(rows)
+                # for q in queries:
+                #     dbcursor.execute(q)
+                #     rows = dbcursor.fetchall()
+                #     print(rows)
 
             # Test cases done!
             # clear_tables(sqlClient)
