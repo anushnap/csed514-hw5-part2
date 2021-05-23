@@ -41,7 +41,6 @@ class VaccineCaregiver:
 
         for _day in _weeks_to_schedule:
             _formattedDate = _day.strftime(_formatstring)
-            # print (_formattedDate)
 
             for _hr in _hoursToSchedlue:
                 _startTime = 0

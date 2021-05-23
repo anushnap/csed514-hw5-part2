@@ -46,4 +46,3 @@ class SqlConnectionManager:
             print(excinst)
             print("stack trace: " + str(callstack))
 
-#==========================================================================

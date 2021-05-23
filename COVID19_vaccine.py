@@ -51,8 +51,7 @@ class COVID19Vaccine:
         
         try: 
             cursor.execute(sqltext)
-            # cursor.connection.commit()
-            print("Query executed successfully.")
+            print("Query executed successfully. Doses added for " + vaccine_name)
         
         except pymssql.Error as db_err:
             cursor.connection.rollback()
@@ -79,8 +78,6 @@ class COVID19Vaccine:
                 doses_in_stock += row['AvailableDoses']
                 doses_reserved += row['ReservedDoses']
                 doses_needed += row['DosesPerPatient']
-            
-            print("Query executed successfully.")
         
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for ReserveDoses")
@@ -112,8 +109,7 @@ class COVID19Vaccine:
 
         try: 
             cursor.execute(sqltext2)
-            # cursor.connection.commit()
-            print("Query executed successfully.")
+            print("Query executed successfully. Vaccines inventory updated.")
         
         except pymssql.Error as db_err:
             cursor.connection.rollback()
@@ -131,7 +127,6 @@ class COVID19Vaccine:
         
         try: 
             cursor.execute(sqltext)
-            # cursor.connection.commit()
             print("Query executed successfully.")
         
         except pymssql.Error as db_err:

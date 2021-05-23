@@ -39,7 +39,6 @@ class VaccineReservationScheduler:
             self.put_on_hold_sql += "SET SlotStatus = 1 "
             self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
             cursor.execute(self.put_on_hold_sql)
-            # cursor.connection.commit()
 
             return self.slotSchedulingId
 
@@ -49,13 +48,11 @@ class VaccineReservationScheduler:
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])           
             print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
-            # cursor.connection.rollback()
             return -1
         
         # No appointments available
         except IndexError as idx_err:
             print("There are no available appointments at this time.")
-            # cursor.connection.rollback()
             return -2
 
     def PutHoldOnAppointment2(self, caregiver_slotid_first_dose, days_between_doses, cursor):
@@ -104,7 +101,6 @@ class VaccineReservationScheduler:
                 self.put_on_hold_sql += "SET SlotStatus = 1 "
                 self.put_on_hold_sql += "WHERE CaregiverSlotSchedulingId = " + str(self.slotSchedulingId)
                 cursor.execute(self.put_on_hold_sql)
-                # cursor.connection.commit()
 
                 return self.slotSchedulingId
         
@@ -180,7 +176,7 @@ if __name__ == '__main__':
 
             # get a cursor from the SQL connection
             with sqlClient.cursor(as_dict=True) as dbcursor:
-                # Iniialize the caregivers, patients & vaccine supply
+                # Initalize the caregivers, patients & vaccine supply
                 caregiversList = []
                 caregiversList.append(VaccineCaregiver('Carrie Nation', dbcursor))
                 caregiversList.append(VaccineCaregiver('Clare Barton', dbcursor))
@@ -190,14 +186,8 @@ if __name__ == '__main__':
                     caregivers[cgid] = cg
 
                 # Add a vaccine and Add doses to inventory of the vaccine
-                # vaccines_list = []
-                # vaccines_list.append(covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor))
-                # vaccines_list.append(covid('Pfizer', 'Pfizer-BioNTech', 0, 0, 21, 2, dbcursor))
-                # vaccines_list.append(covid('J&J', 'Johnson & Johnson/Janssen', 0, 0, 0, 1, dbcursor))
                 vaccine = covid('Moderna', 'Moderna', 0, 0, 28, 2, dbcursor)
                 covid.add_doses('Moderna', 5, dbcursor)
-                # covid.add_doses('Pfizer', 2, dbcursor)
-                # covid.add_doses('J&J', 50, dbcursor)
 
                 # Add patients
                 patientList = []
@@ -230,19 +220,6 @@ if __name__ == '__main__':
                         print(err_str)
                         print(e)
                         dbcursor.connection.rollback()
-                
-                # Debugging print statements
-                # check_patients = "SELECT * FROM Patients"
-                # check_vaccines = "SELECT * FROM Vaccines"
-                # check_cgs = "SELECT CaregiverSlotSchedulingId, CaregiverId, WorkDay, SlotStatus, VaccineAppointmentId "
-                # check_cgs += "FROM CaregiverSchedule where SlotStatus IN (1, 2)"
-                # check_appts = "SELECT * FROM VaccineAppointments"
-                # queries = [check_patients, check_vaccines, check_cgs, check_appts]
-
-                # for q in queries:
-                #     dbcursor.execute(q)
-                #     rows = dbcursor.fetchall()
-                #     print(rows)
 
             # Test cases done!
             # clear_tables(sqlClient)

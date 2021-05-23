@@ -56,7 +56,6 @@ class VaccinePatient:
             SlotStatus = row['SlotStatus']
             DoseNumber = 1
 
-            #print("Query executed successfully.")
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Selecting Caregiver Slot")
             print("Exception code: " + str(db_err.args[0]))
@@ -186,7 +185,6 @@ class VaccinePatient:
 
         try:
             cursor.execute(sqlCreateAppt2)
-            #cursor.connection.commit()
             cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
             _identityRow = cursor.fetchone()
             appointmentId2 = _identityRow['Identity']
